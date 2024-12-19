@@ -1,0 +1,40 @@
+Schedule:
+- Day: Tuesday
+  Schedule:
+  - Name: Linear Algebra
+    Time: 10:00-11:30
+    Teacher: Tushavin Gleb Vladimirovich
+    Class: '2202'
+    Building: Lomonosova st, b9/A
+  - Name: Linear Algebra
+    Time: 11:40-13:10
+    Teacher: Milushin Aleksandr Sergeevich
+    Class: '4210'
+    Building: Lomonosova st, b9/A
+  - Name: Math Analysis
+    Time: 13:30-15:00
+    Teacher: Nakonechnaya Oksana Valeryevna
+    Class: '3302'
+    Building: Lomonosova st, b9/A
+  - Name: English Language C1
+    Time: 15:20-16:50
+    Teacher: Nakonechnaya Oksana Valeryevna
+    Class: '3302'
+    Building: Lomonosova st, b9/A
+  - Name: English Language C1
+    Time: 17:00-18:30
+    Teacher: Nakonechnaya Oksana Valeryevna
+    Class: '3302'
+    Building: Lomonosova st, b9/A
+- Day: Friday
+  Schedule:
+  - Name: Discrete math
+    Time: 17:00-18:30
+    Teacher: Polyakov Vladimir Ivanovich
+    Class: '1428'
+    Building: Kronverskiy av, b49/A
+  - Name: Discrete math
+    Time: 18:40-20:10
+    Teacher: Polyakov Vladimir Ivanovich
+    Class: '1428'
+    Building: Kronverskiy av, b49/A
