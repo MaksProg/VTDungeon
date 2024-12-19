@@ -1,6 +1,3 @@
 [submodule "Java"]
 	path = Java
 	url = https://github.com/MaksProg/Java.git
-[submodule "INF"]
-	path = INF
-	url = https://github.com/MaksProg/INF.git
