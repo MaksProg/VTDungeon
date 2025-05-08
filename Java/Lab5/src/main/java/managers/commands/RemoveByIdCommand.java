@@ -10,32 +10,37 @@ import system.TextColor;
  * @version 1.0
  */
 public class RemoveByIdCommand implements Command {
+  private final CollectionManager collectionManager;
+
+  public RemoveByIdCommand(CollectionManager collectionManager) {
+    this.collectionManager = collectionManager;
+  }
+
   @Override
   public void execute(String[] args) {
     if (args.length < 1) {
-      System.out.print(
-          TextColor.ANSI_RED + "Ошибка: укажите id для удаления!" + TextColor.ANSI_RESET);
+      TextColor.errorMessage("Ошибка: укажите id для удаления!");
       return;
     }
 
     try {
       int id = Integer.parseInt(args[0]);
-      boolean removed = CollectionManager.removeById(id);
+      boolean removed = collectionManager.removeById(id);
 
       if (removed) {
         System.out.println(
-            TextColor.ANSI_GREEN + "Билет с id " + id + " успешно удалён" + TextColor.ANSI_RESET);
+            TextColor.formatSuccess("Билет с id ") + id + TextColor.formatSuccess(" удалён"));
       } else {
         System.out.println(
-            TextColor.ANSI_RED
-                + "Билет с id "
-                + id
-                + " не найден в коллекции"
-                + TextColor.ANSI_RESET);
+            TextColor.formatError("Билет с id") + id + TextColor.formatError(" не найден"));
       }
     } catch (NumberFormatException e) {
-      System.out.println(
-          TextColor.ANSI_RED + "Ошибка: id должен быть целым числом!" + TextColor.ANSI_RESET);
+      TextColor.errorMessage("Ошибка: id должен быть целым числом!");
     }
+  }
+
+  @Override
+  public String getDescription() {
+    return "удаляет билет по его id";
   }
 }

@@ -10,11 +10,22 @@ import managers.CollectionManager;
  * @version 1.0
  */
 public class SumOfPriceCommand implements Command {
+  private final CollectionManager collectionManager;
+
+  public SumOfPriceCommand(CollectionManager collectionManager) {
+    this.collectionManager = collectionManager;
+  }
+
   @Override
   public void execute(String[] args) {
     double sum =
-        CollectionManager.getDequeCollection().stream().mapToDouble(Ticket::getPrice).sum();
+        collectionManager.getDequeCollection().stream().mapToDouble(Ticket::getPrice).sum();
 
     System.out.println("Сумма всех значений поля price: " + sum);
+  }
+
+  @Override
+  public String getDescription() {
+    return "выводит сумму цены всех билетов";
   }
 }

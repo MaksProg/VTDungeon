@@ -1,5 +1,6 @@
 package managers.commands;
 
+import system.Console;
 import system.TextColor;
 
 /**
@@ -9,9 +10,21 @@ import system.TextColor;
  * @version 1.0
  */
 public class ExitCommand implements Command {
+
+  private final Console console;
+
+  public ExitCommand(Console console) {
+    this.console = console;
+  }
+
   @Override
   public void execute(String[] args) {
-    System.out.println(TextColor.ANSI_GREEN + "Завершение программы..." + TextColor.ANSI_RESET);
-    System.exit(0);
+    TextColor.successMessage("Завершение программы...");
+    console.setRunning(false);
+  }
+
+  @Override
+  public String getDescription() {
+    return "выход из приложения";
   }
 }

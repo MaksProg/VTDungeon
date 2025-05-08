@@ -3,11 +3,6 @@ package managers.commands;
 import data.*;
 import data.Ticket;
 import java.util.Optional;
-import java.util.Scanner;
-import java.util.Set;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
 import managers.CollectionManager;
 import system.InputManager;
 import system.TextColor;
@@ -19,8 +14,12 @@ import system.TextColor;
  * @version 1.0
  */
 public class UpdateIdCommand implements Command {
-  private static final Validator validator =
-      Validation.buildDefaultValidatorFactory().getValidator();
+
+  private final CollectionManager collectionManager;
+
+  public UpdateIdCommand(CollectionManager collectionManager) {
+    this.collectionManager = collectionManager;
+  }
 
   @Override
   public void execute(String[] args) {
@@ -31,55 +30,94 @@ public class UpdateIdCommand implements Command {
     try {
       int id = Integer.parseInt(args[0]);
       Optional<Ticket> existingTicket =
-          CollectionManager.getDequeCollection().stream().filter(t -> t.getId() == id).findFirst();
+          collectionManager.getDequeCollection().stream().filter(t -> t.getId() == id).findFirst();
       if (existingTicket.isEmpty()) {
         System.out.println(
-            TextColor.ANSI_RED + "Билет с id " + id + " не найден" + TextColor.ANSI_RESET);
+            TextColor.formatError("Билет с id ") + id + TextColor.formatError(" не найден"));
         return;
       }
 
       Ticket ticket = existingTicket.get();
-      Scanner scanner = InputManager.getScanner();
 
-      System.out.print("Введите новое название билета: ");
-      ticket.setName(scanner.nextLine().trim());
+      String name =
+          InputManager.promptValid(
+              "Введите новое название билета: ",
+              s -> s,
+              s -> !s.isEmpty(),
+              "Название не может быть пустым");
+      ticket.setName(name);
 
-      System.out.print("Введите координату X: ");
-      Double coordX = Double.parseDouble(scanner.nextLine());
-
-      System.out.print("Введите координату Y (> -593): ");
-      Integer coordY = Integer.parseInt(scanner.nextLine());
-
+      Double coordX =
+          InputManager.promptValid(
+              "Введите координату X: ", Double::parseDouble, x -> true, "Некорректное значение X");
+      Integer coordY =
+          InputManager.promptValid(
+              "Введите координату Y (> -593): ",
+              Integer::parseInt,
+              y -> y > -593,
+              "Y должен быть больше -593");
       ticket.setCoordinates(new Coordinates(coordX, coordY));
 
-      System.out.print("Введите цену (> 0): ");
-      ticket.setPrice(Double.parseDouble(scanner.nextLine()));
+      double price =
+          InputManager.promptValid(
+              "Введите цену (> 0): ", Double::parseDouble, p -> p > 0, "Цена должна быть больше 0");
+      ticket.setPrice(price);
 
-      System.out.print("Введите тип билета (VIP, USUAL, BUDGETARY, CHEAP): ");
-      ticket.setType(TicketType.valueOf(scanner.nextLine().trim().toUpperCase()));
+      TicketType type =
+          InputManager.promptValid(
+              "Введите тип билета (VIP, USUAL, BUDGETARY, CHEAP): ",
+              s -> TicketType.valueOf(s.toUpperCase()),
+              t -> true,
+              "Неверный тип билета");
+      ticket.setType(type);
 
-      System.out.print("Введите название площадки: ");
-      String venueName = scanner.nextLine().trim();
+      String venueName =
+          InputManager.promptValid(
+              "Введите название площадки: ",
+              s -> s,
+              s -> !s.isEmpty(),
+              "Название не может быть пустым");
 
-      System.out.print("Введите вместимость площадки (> 0): ");
-      int capacity = Integer.parseInt(scanner.nextLine());
+      int capacity =
+          InputManager.promptValid(
+              "Введите вместимость площадки (> 0): ",
+              Integer::parseInt,
+              c -> c > 0,
+              "Вместимость должна быть больше 0");
 
-      System.out.print("Введите тип площадки (PUB, BAR, LOFT, CINEMA, STADIUM): ");
-      String venueTypeStr = scanner.nextLine().trim();
+      String venueTypeStr =
+          InputManager.promptValid(
+              "Введите тип площадки (PUB, BAR, LOFT, CINEMA, STADIUM): ",
+              s -> s,
+              s -> true,
+              "Тип площадки не обязателен (можно оставить пустым)");
       VenueType venueType =
           venueTypeStr.isEmpty() ? null : VenueType.valueOf(venueTypeStr.toUpperCase());
 
-      System.out.print("Введите zipCode: ");
-      String zipCode = scanner.nextLine().trim();
+      String zipCode =
+          InputManager.promptValid(
+              "Введите zipCode: ", s -> s, s -> !s.isEmpty(), "zipCode не может быть пустым");
 
-      System.out.print("Введите название города: ");
-      String townName = scanner.nextLine().trim();
+      String townName =
+          InputManager.promptValid(
+              "Введите название города: ",
+              s -> s,
+              s -> !s.isEmpty(),
+              "Название города не может быть пустым");
 
-      System.out.print("Введите координату X города: ");
-      long townX = Long.parseLong(scanner.nextLine());
+      long townX =
+          InputManager.promptValid(
+              "Введите координату X города: ",
+              Long::parseLong,
+              x -> true,
+              "Некорректное значение X");
 
-      System.out.print("Введите координату Y города: ");
-      Long townY = Long.parseLong(scanner.nextLine());
+      Long townY =
+          InputManager.promptValid(
+              "Введите координату Y города: ",
+              Long::parseLong,
+              y -> true,
+              "Некорректное значение Y");
 
       Location town = new Location(townX, townY, townName);
       Address address = new Address(zipCode, town);
@@ -87,24 +125,19 @@ public class UpdateIdCommand implements Command {
 
       ticket.setVenue(venue);
 
-      Set<ConstraintViolation<Ticket>> violations = validator.validate(ticket);
-      if (!violations.isEmpty()) {
-        System.out.println(TextColor.ANSI_RED + "Ошибки валидации:" + TextColor.ANSI_RESET);
-        for (ConstraintViolation<Ticket> violation : violations) {
-          System.out.println("- " + violation.getMessage());
-        }
-        return;
-      }
-
       System.out.println(
-          TextColor.ANSI_GREEN + "Билет с id " + id + " успешно обновлён." + TextColor.ANSI_RESET);
+          TextColor.formatSuccess("Билет с id ")
+              + id
+              + TextColor.formatSuccess(" успешно обновлён."));
 
     } catch (Exception e) {
-      System.out.println(
-          TextColor.ANSI_RED
-              + "Ошибка при обновлении билета: "
-              + e.getMessage()
-              + TextColor.ANSI_RESET);
+      TextColor.errorMessage("Ошибка при обновлении билета: ");
+      System.out.println(e.getMessage());
     }
+  }
+
+  @Override
+  public String getDescription() {
+    return "обновляет элемент по id";
   }
 }

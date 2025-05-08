@@ -10,9 +10,22 @@ import system.TextColor;
  * @version 1.0
  */
 public class HistoryCommand implements Command {
+  private CommandManager commandManager;
+
+  public HistoryCommand() {}
+
+  public void setCommandManager(CommandManager commandManager) {
+    this.commandManager = commandManager;
+  }
+
   @Override
   public void execute(String[] args) {
-    System.out.println(TextColor.ANSI_GREEN + "Последние 6 команд:" + TextColor.ANSI_RESET);
-    CommandManager.lastSixCommands.forEach(System.out::println);
+    TextColor.successMessage("Последние 6 команд:");
+    commandManager.lastSixCommands.forEach(System.out::println);
+  }
+
+  @Override
+  public String getDescription() {
+    return "выводит последние 6 команд без аргументов";
   }
 }

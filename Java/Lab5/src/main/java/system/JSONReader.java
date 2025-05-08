@@ -1,8 +1,11 @@
 package system;
 
+import static managers.IdManager.ticketIdGenerator;
+import static managers.IdManager.venueIdGenerator;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import data.Ticket;
+import exceptions.InvalidJsonFileException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,6 +16,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import managers.VenueManager;
 
 /**
  * Класс для чтения JSON
@@ -21,13 +25,13 @@ import javax.validation.ValidatorFactory;
  * @version 1.0
  */
 public class JSONReader {
-
+  private final VenueManager venueManager;
   private final ObjectMapper objectMapper;
   private final Validator validator;
 
-  public JSONReader() {
-    this.objectMapper = new ObjectMapper();
-    this.objectMapper.registerModule(new JavaTimeModule());
+  public JSONReader(ObjectMapper objectMapper, VenueManager venueManager) {
+    this.objectMapper = objectMapper;
+    this.venueManager = venueManager;
 
     ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     this.validator = factory.getValidator();
@@ -45,13 +49,16 @@ public class JSONReader {
 
       for (Ticket ticket : tickets) {
         validateTicket(ticket);
+        ticketIdGenerator.registerId(ticket.getId());
+        venueIdGenerator.registerId(ticket.getVenue().getId());
+        if (ticket.getVenue() != null) {
+          venueManager.addVenue(ticket.getVenue());
+        }
       }
 
       return new ArrayDeque<>(Arrays.asList(tickets));
     } catch (IOException e) {
-      throw new RuntimeException(
-          TextColor.ANSI_RED + "Ошибка при чтении файла:" + e.getMessage() + TextColor.ANSI_RESET,
-          e);
+      throw new InvalidJsonFileException("Ошибка при чтении JSON-файла: " + filename, e);
     }
   }
 

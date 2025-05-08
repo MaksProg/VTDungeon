@@ -1,13 +1,14 @@
 package data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import static managers.IdManager.ticketIdGenerator;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import data.generators.TicketIdGenerator;
 import java.time.ZonedDateTime;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import system.utils.TicketComparator;
 
 /**
  * Класс имитирующий структуру билета "Ticket"
@@ -15,8 +16,8 @@ import javax.validation.constraints.NotNull;
  * @author Maks
  * @version 1.0
  */
-public class Ticket {
-  @JsonIgnore
+public class Ticket implements Comparable<Ticket> {
+
   private int id; // Значение поля должно быть больше 0, Значение этого поля должно быть уникальным,
 
   // Значение этого поля должно генерироваться автоматически
@@ -48,7 +49,7 @@ public class Ticket {
   private Venue venue; // Поле может быть null
 
   public Ticket() {
-    this.id = TicketIdGenerator.getId();
+    this.id = ticketIdGenerator.generateId();
     this.creationDate = ZonedDateTime.now();
   }
 
@@ -58,7 +59,7 @@ public class Ticket {
       @JsonProperty("price") Double price,
       @JsonProperty("type") TicketType type,
       @JsonProperty("venue") Venue venue) {
-    this.id = TicketIdGenerator.getId();
+    this.id = ticketIdGenerator.generateId();
     this.name = name;
     this.coordinates = coordinates;
     this.creationDate = ZonedDateTime.now();
@@ -86,6 +87,11 @@ public class Ticket {
         + ", venue="
         + venue
         + '}';
+  }
+
+  @Override
+  public int compareTo(Ticket other) {
+    return new TicketComparator().compare(this, other);
   }
 
   public int getId() {

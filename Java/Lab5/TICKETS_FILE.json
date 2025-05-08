@@ -25,7 +25,7 @@
     }
   },
   {
-    "id": 5,
+    "id": 3,
     "name": "Ticket 2",
     "coordinates": {
       "x": 110.2,
@@ -35,7 +35,7 @@
     "price": 200.00,
     "type": "USUAL",
     "venue": {
-      "id": 4,
+      "id":35 ,
       "name": "Stadium",
       "capacity": 50000,
       "type": "STADIUM",

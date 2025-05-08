@@ -10,6 +10,6 @@ import system.TextColor;
  */
 public class UnknownCommandException extends Exception {
   public UnknownCommandException(String command) {
-    super(TextColor.ANSI_RED + "Неизвестная команда:" + command + TextColor.ANSI_RESET);
+    super(TextColor.formatError("Неизвестная команда: ") + command);
   }
 }

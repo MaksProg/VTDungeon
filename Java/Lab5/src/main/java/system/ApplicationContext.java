@@ -10,29 +10,42 @@ import managers.CommandManager;
  * @version 1.0
  */
 public class ApplicationContext {
-  public static final String DATA_PATH = System.getenv("TICKETS_FILE");
-  private static final JSONReader jsonReader = new JSONReader();
-  private static final JSONWriter jsonWriter = new JSONWriter();
-  private static final CollectionManager collectionManager = new CollectionManager();
-  private static final CommandManager commandManager = new CommandManager();
+  private final String dataPath;
+  private final JSONReader jsonReader;
+  private final JSONWriter jsonWriter;
+  private final CollectionManager collectionManager;
+  private final CommandManager commandManager;
 
-  public static String getDataPath() {
-    return DATA_PATH;
+  public ApplicationContext(
+      String dataPath,
+      JSONReader jsonReader,
+      JSONWriter jsonWriter,
+      CollectionManager collectionManager,
+      CommandManager commandManager) {
+    this.dataPath = dataPath;
+    this.jsonReader = jsonReader;
+    this.jsonWriter = jsonWriter;
+    this.collectionManager = collectionManager;
+    this.commandManager = commandManager;
   }
 
-  public static JSONWriter getJsonWriter() {
-    return jsonWriter;
+  public String getDataPath() {
+    return dataPath;
   }
 
-  public static JSONReader getJsonReader() {
+  public JSONReader getJsonReader() {
     return jsonReader;
   }
 
-  public static CollectionManager getCollectionManager() {
+  public JSONWriter getJsonWriter() {
+    return jsonWriter;
+  }
+
+  public CollectionManager getCollectionManager() {
     return collectionManager;
   }
 
-  public static CommandManager getCommandManager() {
+  public CommandManager getCommandManager() {
     return commandManager;
   }
 }

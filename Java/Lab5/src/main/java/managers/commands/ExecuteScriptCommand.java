@@ -1,14 +1,16 @@
 package managers.commands;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
-import system.ApplicationContext;
+import managers.CommandManager;
 import system.InputManager;
+import system.TextColor;
 
 /**
  * Класс команды, которая читает скрипт из файла и выполняет его. Защищён от рекурсии.
@@ -17,12 +19,19 @@ import system.InputManager;
  * @version 1.0
  */
 public class ExecuteScriptCommand implements Command {
-  private static final Set<String> runningScripts = new HashSet<>();
+  private final Set<String> runningScripts = new HashSet<>();
+  private CommandManager commandManager;
+
+  public ExecuteScriptCommand() {}
+
+  public void setCommandManager(CommandManager commandManager) {
+    this.commandManager = commandManager;
+  }
 
   @Override
   public void execute(String[] args) {
     if (args.length == 0) {
-      System.out.println("Укажите путь к файлу со скриптом");
+      TextColor.errorMessage("Укажите путь к файлу со скриптом");
       return;
     }
 
@@ -35,32 +44,34 @@ public class ExecuteScriptCommand implements Command {
     }
 
     if (!Files.exists(path) || !Files.isReadable(path)) {
-      System.out.println("Файл не найден или недоступен");
+      TextColor.errorMessage("Файл не найден или недоступен");
       return;
     }
 
     runningScripts.add(path.toString());
 
-    try (Scanner fileScanner = new Scanner(Files.newInputStream(path))) {
+    try (InputStream inputStream = Files.newInputStream(path)) {
       Scanner previousScanner = InputManager.getScanner();
+      InputManager.setInput(inputStream);
 
-      InputManager.setScanner(fileScanner);
-
-      while (fileScanner.hasNextLine()) {
-        String line = fileScanner.nextLine().trim();
+      while (InputManager.hasNextLine()) {
+        String line = InputManager.nextLine().trim();
         if (line.isEmpty() || line.startsWith("#")) continue;
-
         System.out.println(">>> " + line);
-
-        ApplicationContext.getCommandManager().executeCommand(line);
+        commandManager.executeCommand(line);
       }
 
       InputManager.setScanner(previousScanner);
-
     } catch (IOException e) {
-      System.out.println("Ошибка при чтении файла: " + e.getMessage());
+      TextColor.errorMessage("Ошибка при чтении файла: ");
+      System.out.println(e.getMessage());
     } finally {
       runningScripts.remove(path.toString());
     }
+  }
+
+  @Override
+  public String getDescription() {
+    return "исполняет скрипт из файла";
   }
 }

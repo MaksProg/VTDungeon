@@ -1,9 +1,9 @@
 package managers.commands;
 
-import java.util.Optional;
+import data.Ticket;
+import data.generators.TicketGenerator;
 import managers.CollectionManager;
-import system.ApplicationContext;
-import system.TextColor;
+import managers.VenueManager;
 
 /**
  * Класс команды добавляющую билет, если вместимость площадки нового билета больше чем максимальная
@@ -13,37 +13,33 @@ import system.TextColor;
  * @version 1.0
  */
 public class AddIfMaxCommand implements Command {
+  private final CollectionManager collectionManager;
+  private final VenueManager venueManager;
+
+  public AddIfMaxCommand(CollectionManager collectionManager, VenueManager venueManager) {
+    this.collectionManager = collectionManager;
+    this.venueManager = venueManager;
+  }
 
   @Override
   public void execute(String[] args) {
-    if (args.length == 0) {
-      System.out.println("Укажите вместимость для сравнения");
+    if (args.length != 1) {
+      System.out.println("Ошибка: данная команда не принимает аргументы");
       return;
     }
 
-    try {
-      int newCapacity = Integer.parseInt(args[0]);
+    Ticket maxTicket = collectionManager.getMaxTicket();
+    Ticket ticket = TicketGenerator.createTicket(venueManager);
 
-      Optional<Integer> maxCapacity =
-          CollectionManager.getDequeCollection().stream()
-              .map(ticket -> ticket.getVenue().getCapacity())
-              .max(Integer::compareTo);
-
-      if (maxCapacity.isPresent()) {
-        if (newCapacity > maxCapacity.get()) {
-          ApplicationContext.getCommandManager().executeCommand("add");
-        } else {
-          System.out.println("Вместимость не превышает текущий максимум, билет не добавлен.");
-        }
-      } else {
-        ApplicationContext.getCommandManager().executeCommand("add");
-      }
-
-    } catch (NumberFormatException e) {
-      System.out.println(
-          TextColor.ANSI_RED + "Ошибка: Введите корректное число" + TextColor.ANSI_RESET);
-    } catch (Exception e) {
-      System.out.println(TextColor.ANSI_RED + "Ошибка: " + e.getMessage() + TextColor.ANSI_RESET);
+    if (maxTicket == null || collectionManager.getDequeCollection().isEmpty()) {
+      collectionManager.addTicket(ticket);
+    } else if (ticket.compareTo(maxTicket) > 0) {
+      collectionManager.addTicket(ticket);
     }
+  }
+
+  @Override
+  public String getDescription() {
+    return "добавляет билет если он максимальный";
   }
 }

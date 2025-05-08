@@ -1,8 +1,9 @@
 package data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import static managers.IdManager.venueIdGenerator;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import data.generators.VenueIdGenerator;
+import java.util.Objects;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
@@ -13,8 +14,9 @@ import javax.validation.constraints.NotNull;
  * @version 1.0
  */
 public class Venue {
-  @JsonIgnore
-  @NotNull(message = "Поле id не может быть 0")
+
+  @Min(value = 1, message = "Значение поля должно быть больше 0")
+  @NotNull(message = "Поле id не может быть null")
   private Integer
       id; // Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно
 
@@ -37,7 +39,7 @@ public class Venue {
       @JsonProperty("capacity") int capacity,
       @JsonProperty("type") VenueType type,
       @JsonProperty("address") Address address) {
-    this.id = VenueIdGenerator.getId(); // Игнорируем ID из файла
+    this.id = venueIdGenerator.generateId();
     this.name = name;
     this.capacity = capacity;
     this.type = type;
@@ -99,5 +101,21 @@ public class Venue {
 
   public void setAddress(Address address) {
     this.address = address;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    Venue venue = (Venue) obj;
+    return capacity == venue.capacity
+        && Objects.equals(name, venue.name)
+        && type == venue.type
+        && Objects.equals(address, venue.address);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, capacity, type, address);
   }
 }

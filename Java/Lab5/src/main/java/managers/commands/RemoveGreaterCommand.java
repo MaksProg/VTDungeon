@@ -1,41 +1,52 @@
 package managers.commands;
 
 import data.Ticket;
+import data.generators.TicketGenerator;
 import java.util.Iterator;
 import managers.CollectionManager;
+import managers.VenueManager;
 import system.TextColor;
 
 /**
- * Класс реализующий команду которая удаляет все билеты цена которых больше той, которую ввёл пользователь
+ * Класс, реализующий команду, которая удаляет все билеты большие чем ввёл пользователь
+ *
  * @author Maks
  * @version 1.0
  */
 public class RemoveGreaterCommand implements Command {
+  private final CollectionManager collectionManager;
+  private final VenueManager venueManager;
+
+  public RemoveGreaterCommand(CollectionManager collectionManager, VenueManager venueManager) {
+    this.collectionManager = collectionManager;
+    this.venueManager = venueManager;
+  }
+
   @Override
   public void execute(String[] args) {
-    if (args.length == 0) {
-      System.out.println("Укажите цену для сравнения");
-      return;
-    }
+
+    Ticket compareTicket = TicketGenerator.createTicket(venueManager);
 
     try {
-      double priceThreshold = Double.parseDouble(args[0]);
-      Iterator<Ticket> iterator = CollectionManager.getDequeCollection().iterator();
+      Iterator<Ticket> iterator = collectionManager.getDequeCollection().iterator();
 
       int removedCount = 0;
       while (iterator.hasNext()) {
         Ticket ticket = iterator.next();
-        if (ticket.getPrice() > priceThreshold) {
+        if (ticket.compareTo(compareTicket) > 0) {
           iterator.remove();
           removedCount++;
         }
       }
-
-      System.out.println(
-          TextColor.ANSI_GREEN + "Удалено билетов: " + removedCount + TextColor.ANSI_RESET);
+      TextColor.successMessage("Удалено билетов: ");
+      System.out.print(removedCount);
     } catch (NumberFormatException e) {
-      System.out.println(
-          TextColor.ANSI_RED + "Неверный формат числа: " + args[0] + TextColor.ANSI_RESET);
+      TextColor.errorMessage("Неверный формат числа");
     }
+  }
+
+  @Override
+  public String getDescription() {
+    return "удаляет все превосходящие по значению билеты";
   }
 }
