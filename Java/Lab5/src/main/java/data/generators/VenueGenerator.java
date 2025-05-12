@@ -8,6 +8,7 @@ import system.InputManager;
 
 /**
  * Класс реализующий создание Venue
+ *
  * @author Maks
  * @version 1.0
  */
@@ -54,7 +55,6 @@ public class VenueGenerator {
     Address address = new Address(zipCode, town);
     Venue venue = new Venue(venueName, capacity, venueType, address);
 
-    System.out.println("Площадка создана");
     return venue;
   }
 }

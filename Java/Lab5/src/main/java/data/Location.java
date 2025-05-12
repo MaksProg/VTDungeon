@@ -1,6 +1,7 @@
 package data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -36,6 +37,18 @@ public class Location {
 
   public String getName() {
     return name;
+  }
+
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Location location = (Location) o;
+    return Objects.equals(x, location.x) && Objects.equals(y, location.y);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(x, y);
   }
 
   @Override

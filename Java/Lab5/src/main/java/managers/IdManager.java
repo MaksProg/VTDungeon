@@ -4,6 +4,7 @@ import data.generators.IdGenerator;
 
 /**
  * Класс хранящий экземпляры генераторов Id для объектов
+ *
  * @author Maks
  * @version 1.0
  */

@@ -6,6 +6,7 @@ import system.InputManager;
 
 /**
  * Класс реализующий создание билета
+ *
  * @author Maks
  * @version 1.0
  */
@@ -58,7 +59,7 @@ public class TicketGenerator {
                                     2. Создать новую площадку
                                     3. Выбрать из существующих по ID
                                 """);
-      String choice = InputManager.nextLine().trim();
+      String choice = InputManager.safeNextLine().trim();
 
       switch (choice) {
         case "1":
@@ -70,6 +71,8 @@ public class TicketGenerator {
           return newVenue;
         case "3":
           System.out.print("Введите ID площадки: ");
+          String idInput = InputManager.safeNextLine().trim();
+          System.out.println(idInput);
           try {
             int id = Integer.parseInt(InputManager.nextLine().trim());
             Venue existing = venueManager.getById(id);

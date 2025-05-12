@@ -22,7 +22,8 @@ public class InputManager {
       String prompt, Function<String, T> parser, Predicate<T> validator, String errorMsg) {
     while (true) {
       System.out.print(prompt);
-      String input = scanner.nextLine().trim();
+      String input = safeNextLine().trim();
+      System.out.println(input);
       try {
         T value = parser.apply(input);
         if (validator.test(value)) {
@@ -54,5 +55,16 @@ public class InputManager {
 
   public static void setInput(InputStream inputStream) {
     scanner = new Scanner(inputStream);
+  }
+
+  private static final Scanner fallbackScanner = new Scanner(System.in);
+
+  public static String safeNextLine() {
+    if (scanner.hasNextLine()) {
+      return scanner.nextLine();
+    } else {
+      System.out.print("(ввод с клавиатуры) > ");
+      return fallbackScanner.nextLine();
+    }
   }
 }

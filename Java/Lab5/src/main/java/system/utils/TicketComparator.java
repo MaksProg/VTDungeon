@@ -5,6 +5,7 @@ import java.util.Comparator;
 
 /**
  * Класс реализующий механику сравнения билетов
+ *
  * @author Maks
  * @version 1.0
  */

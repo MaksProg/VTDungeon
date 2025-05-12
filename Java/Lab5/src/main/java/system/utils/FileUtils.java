@@ -8,12 +8,14 @@ import java.time.ZonedDateTime;
 
 /**
  * Класс реализующий работу с файлами
+ *
  * @author Maks
  * @version 1.0
  */
 public class FileUtils {
   /**
    * Функция которая получает время создания файла
+   *
    * @param filePath
    * @return Время создания файла, если его невозможно получить, возвращает текущее время
    */

@@ -16,6 +16,7 @@ public class IdGenerator {
 
   /**
    * Генерирует Id
+   *
    * @return Возвращает Id
    */
   public int generateId() {
@@ -32,6 +33,7 @@ public class IdGenerator {
 
   /**
    * Фиксирует Id кладя его в коллекцию, а так же устанавливает Id на максимальное
+   *
    * @param id
    */
   public void registerId(int id) {
@@ -39,9 +41,7 @@ public class IdGenerator {
     counter.updateAndGet(current -> Math.max(current, id + 1));
   }
 
-  /**
-   * Сбрасывает счётчик Id
-   */
+  /** Сбрасывает счётчик Id */
   public void reset() {
     usedIds.clear();
     counter.set(1);
