@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Ticket 1",
+    "coordinates": {
+      "x": 100.5,
+      "y": -590
+    },
+    "creationDate": "2025-04-13T10:00:00Z",
+    "price": 150.75,
+    "type": "VIP",
+    "venue": {
+      "id": 1,
+      "name": "Cinema Hall",
+      "capacity": 250,
+      "type": "CINEMA",
+      "address": {
+        "zipCode": "12345",
+        "town": {
+          "x": 50,
+          "y": 75,
+          "name": "Town Name"
+        }
+      }
+    }
+  },
+  {
+    "id": 3,
+    "name": "Ticket 2",
+    "coordinates": {
+      "x": 110.2,
+      "y": 300
+    },
+    "creationDate": "2025-04-13T10:30:00Z",
+    "price": 200.00,
+    "type": "USUAL",
+    "venue": {
+      "id":35 ,
+      "name": "Stadium",
+      "capacity": 50000,
+      "type": "STADIUM",
+      "address": {
+        "zipCode": "67890",
+        "town": {
+          "x": 60,
+          "y": 85,
+          "name": "Another Town"
+        }
+      }
+    }
+  }
+]
