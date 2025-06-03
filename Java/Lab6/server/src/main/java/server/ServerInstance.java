@@ -88,43 +88,42 @@ public class ServerInstance {
           if (key.isAcceptable()) {
             SocketChannel clientChannel = serverSocket.accept();
             clientChannel.configureBlocking(false);
-            clientChannel.register(
-                selector, SelectionKey.OP_READ, new NioObjectChannelWrapper(clientChannel));
+            clientChannel.register(selector, SelectionKey.OP_READ, new NioObjectChannelWrapper(clientChannel));
             logger.info("Новое подключение: " + clientChannel.getRemoteAddress());
           } else if (key.isReadable()) {
             NioObjectChannelWrapper wrapper = (NioObjectChannelWrapper) key.attachment();
 
-            if (!wrapper.checkForMessage()) continue;
-
-            Object payload;
             try {
-              payload = wrapper.getPayload();
-            } catch (ClassNotFoundException e) {
-              logger.warning("Не удалось десериализовать объект от клиента: " + e.getMessage());
-              continue;
-            }
+              if (!wrapper.checkForMessage()) continue;
 
-            if (payload instanceof Request request) {
-              logger.info("Получен запрос: " + request.getCommandName());
-              requestHandlerPool.submit(
-                  () -> {
-                    Response response = commandManager.handleRequest(request);
-                    try {
-                      wrapper.sendMessage(response);
-                      logger.info("Ответ отправлен клиенту");
-                    } catch (IOException e) {
-                      logger.warning("Не удалось отправить ответ клиенту: " + e.getMessage());
-                      key.cancel();
-                      try {
-                        wrapper.getChannel().close();
-                      } catch (IOException ex) {
-                        logger.warning("Ошибка при закрытии канала клиента");
-                      }
-                    }
-                  });
-            }
+              Object payload;
+              try {
+                payload = wrapper.getPayload();
+              } catch (ClassNotFoundException e) {
+                logger.warning("Не удалось десериализовать объект от клиента: " + e.getMessage());
+                continue;
+              }
 
-            wrapper.clearInBuffer();
+              if (payload instanceof Request request) {
+                logger.info("Получен запрос: " + request.getCommandName());
+                requestHandlerPool.submit(() -> {
+                  Response response = commandManager.handleRequest(request);
+                  try {
+                    wrapper.sendMessage(response);
+                    logger.info("Ответ отправлен клиенту");
+                  } catch (IOException e) {
+                    logger.warning("Не удалось отправить ответ клиенту: " + e.getMessage());
+                    closeClientConnection(key, wrapper);
+                  }
+                });
+              }
+
+              wrapper.clearInBuffer();
+
+            } catch (IOException e) {
+              logger.info("Клиент отключился: " + e.getMessage());
+              closeClientConnection(key, wrapper);
+            }
           }
         } catch (CancelledKeyException e) {
           logger.warning("Ключ отменён, клиент отключён.");
@@ -182,5 +181,25 @@ public class ServerInstance {
     selector.close();
     serverSocket.close();
     requestHandlerPool.shutdown();
+  }
+
+  /**
+   * Закрывает клиентское соединение и отменяет связанный {@link SelectionKey}.
+   * Используется для корректной обработки отключения клиента или ошибок ввода-вывода.
+   *
+   * <p>Метод отменяет регистрацию канала в {@link Selector} и закрывает {@link SocketChannel},
+   * связанный с данным клиентом. При ошибке во время закрытия выводится сообщение в лог.
+   *
+   * @param key ключ выбора, связанный с клиентским соединением
+   * @param wrapper обёртка над каналом клиента для работы с объектами
+   */
+  private void closeClientConnection(SelectionKey key, NioObjectChannelWrapper wrapper) {
+    try {
+      key.cancel();
+      wrapper.getChannel().close();
+      logger.info("Клиентское соединение закрыто.");
+    } catch (IOException ex) {
+      logger.warning("Ошибка при закрытии канала клиента: " + ex.getMessage());
+    }
   }
 }

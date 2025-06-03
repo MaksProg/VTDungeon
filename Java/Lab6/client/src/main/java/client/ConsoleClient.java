@@ -82,8 +82,7 @@ public class ConsoleClient implements ClientControl {
         Request request;
         if (commandLine.trim().equals("history")) {
           commandManager.addToHistory("history");
-          request =
-              new Request(
+          request = new Request(
                   "history",
                   new RequestBodyWithHistory(new String[0], commandManager.getHistory()));
         } else {
@@ -107,8 +106,9 @@ public class ConsoleClient implements ClientControl {
         }
 
       } catch (IOException e) {
-        System.err.println("Ошибка при отправке запроса: " + e.getMessage());
-        return;
+        System.err.println("\nСоединение с сервером было потеряно: " + e.getMessage());
+        stopClient();
+        System.exit(0);
       } catch (Exception e) {
         System.err.println("Ошибка: " + e.getMessage());
       }
