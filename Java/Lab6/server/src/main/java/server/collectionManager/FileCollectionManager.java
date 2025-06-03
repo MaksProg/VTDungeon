@@ -3,10 +3,13 @@ package server.collectionManager;
 import common.data.Ticket;
 import common.system.JSONReader;
 import common.system.JSONWriter;
+import common.system.utils.TicketLocationComparator;
+
 import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 
 /**
@@ -49,6 +52,7 @@ public class FileCollectionManager implements SaveableCollectionManager {
       System.out.println("Файл не найден или пуст. Создана пустая коллекция.");
     } else {
       this.ticketCollection = reader.readTicketsFromJson(filePath);
+      sortCollectionByLocation();
       System.out.println("Коллекция успешно загружена из файла.");
     }
   }
@@ -85,6 +89,7 @@ public class FileCollectionManager implements SaveableCollectionManager {
    */
   public void setDequeCollection(Deque<Ticket> newCollection) {
     ticketCollection = newCollection;
+    sortCollectionByLocation();
   }
 
   /**
@@ -94,6 +99,7 @@ public class FileCollectionManager implements SaveableCollectionManager {
    */
   public void addTicket(Ticket ticket) {
     ticketCollection.add(ticket);
+    sortCollectionByLocation();
   }
 
   /**
@@ -103,7 +109,9 @@ public class FileCollectionManager implements SaveableCollectionManager {
    * @return {@code true}, если билет был найден и удалён, иначе {@code false}
    */
   public boolean removeById(int id) {
-    return ticketCollection.removeIf(ticket -> ticket.getId() == id);
+    boolean removed = ticketCollection.removeIf(ticket -> ticket.getId() == id);
+    if (removed) sortCollectionByLocation(); // здесь
+    return removed;
   }
 
   /**
@@ -122,4 +130,12 @@ public class FileCollectionManager implements SaveableCollectionManager {
     writer.writeTicketsToJson(ticketCollection, filePath);
     System.out.println("Коллекция успешно сохранена в файл.");
   }
+
+  /** Сортирует коллекцию по Coordinates*/
+  private void sortCollectionByLocation() {
+    ArrayList<Ticket> sortedList = new ArrayList<>(ticketCollection);
+    sortedList.sort(new TicketLocationComparator());
+    ticketCollection = new ArrayDeque<>(sortedList);
+  }
+
 }
