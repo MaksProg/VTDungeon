@@ -50,9 +50,9 @@ public class JSONReader {
       for (Ticket ticket : tickets) {
         validateTicket(ticket);
         ticketIdGenerator.registerId(ticket.getId());
-        venueIdGenerator.registerId(ticket.getVenue().getId());
         if (ticket.getVenue() != null) {
           venueManager.addVenue(ticket.getVenue());
+          venueIdGenerator.registerId(ticket.getVenue().getId());
         }
       }
 

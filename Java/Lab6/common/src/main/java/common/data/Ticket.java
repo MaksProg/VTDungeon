@@ -46,9 +46,7 @@ public class Ticket implements Comparable<Ticket>, Serializable {
   @Valid
   private TicketType type; // Поле не может быть null
 
-  @Valid
-  @NotNull(message = "Поле venue не может быть null")
-  private Venue venue; // Поле может быть null
+  @Valid private Venue venue; // Поле может быть null // Поле может быть null
 
   public Ticket() {
     this.id = ticketIdGenerator.generateId();
