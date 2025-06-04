@@ -31,7 +31,7 @@ public class InputManager {
         throw new IllegalStateException("Ожидался ввод, но данные закончились.");
       }
 
-      String input = in.nextLine().trim();
+      String input = safeNextLine().trim();
       System.out.println(input);
 
       try {
@@ -67,17 +67,16 @@ public class InputManager {
     scanner = new Scanner(inputStream);
   }
 
+
   private static final Scanner fallbackScanner = new Scanner(System.in);
 
   public static String safeNextLine() {
     if (scanner.hasNextLine()) {
       return scanner.nextLine();
-    } else if (scanner != fallbackScanner) {
-      System.out.print("(переход на ручной ввод) > ");
-      scanner = fallbackScanner;
-      return scanner.nextLine();
     } else {
-      return scanner.nextLine();
+      System.out.print("(ввод с клавиатуры) > ");
+      return fallbackScanner.nextLine();
     }
   }
 }
+

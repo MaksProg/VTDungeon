@@ -34,8 +34,6 @@ import server.collectionManager.SaveableCollectionManager;
  */
 public class ServerInstance {
   private static final Logger logger = Logger.getLogger(ServerInstance.class.getName());
-  private static final int BUFFER_SIZE = 8192;
-
   private final CommandManager commandManager;
   private final CollectionManager collectionManager;
   private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
