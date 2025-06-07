@@ -44,7 +44,6 @@ public class CommandManager {
 
   private void initCommands() {
     HelpCommand helpCommand = new HelpCommand();
-    ExecuteScriptCommand executeScriptCommand = new ExecuteScriptCommand();
     HistoryCommand historyCommand = new HistoryCommand();
     commandList = new LinkedHashMap<>();
     commandList.put("help", helpCommand);
@@ -56,7 +55,6 @@ public class CommandManager {
     commandList.put("count_by_venue", new CountByVenueCommand(collectionManager));
     commandList.put("sum_of_price", new SumOfPriceCommand(collectionManager));
     commandList.put("remove_any_by_venue", new RemoveAnyByVenueCommand(collectionManager));
-    commandList.put("execute_script", executeScriptCommand);
     commandList.put("history", new HistoryCommand());
     commandList.put("add_if_max", new AddIfMaxCommand(collectionManager, venueManager));
     commandList.put("remove_greater", new RemoveGreaterCommand(collectionManager, venueManager));
@@ -64,7 +62,6 @@ public class CommandManager {
     commandList.put("add_venue", new AddVenueCommand(venueManager));
     commandList.put("exit", new ExitCommand());
     helpCommand.setCommandManager(this);
-    executeScriptCommand.setCommandManager(this);
   }
 
   /**

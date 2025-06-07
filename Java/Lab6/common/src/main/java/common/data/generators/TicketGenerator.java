@@ -66,7 +66,7 @@ public class TicketGenerator {
         throw new IllegalStateException("Ожидался ввод, но данные закончились.");
       }
 
-      String choice = InputManager.nextLine().trim();
+      String choice = InputManager.safeNextLine().trim();
       System.out.println(choice);
 
       switch (choice) {

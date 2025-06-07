@@ -19,19 +19,21 @@ public class InputManager {
    * @return Валидное значение типа T
    */
   public static <T> T promptValid(
-      Scanner in,
-      String prompt,
-      Function<String, T> parser,
-      Predicate<T> validator,
-      String errorMsg) {
+          Scanner in,
+          String prompt,
+          Function<String, T> parser,
+          Predicate<T> validator,
+          String errorMsg) {
     while (true) {
       System.out.print(prompt);
 
       if (!in.hasNextLine()) {
-        throw new IllegalStateException("Ожидался ввод, но данные закончились.");
+        // Переключаемся на клавиатуру
+        System.out.print("(ввод с клавиатуры) > ");
+        in = fallbackScanner;
       }
 
-      String input = safeNextLine().trim();
+      String input = in.nextLine().trim();
       System.out.println(input);
 
       try {
@@ -46,6 +48,7 @@ public class InputManager {
       }
     }
   }
+
 
   public static void setScanner(Scanner newScanner) {
     scanner = newScanner;
@@ -78,5 +81,5 @@ public class InputManager {
       return fallbackScanner.nextLine();
     }
   }
-}
 
+}
