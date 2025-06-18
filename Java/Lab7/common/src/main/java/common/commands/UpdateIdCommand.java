@@ -62,9 +62,9 @@ public class UpdateIdCommand extends Command {
     }
 
     try {
-      Integer.parseInt(args[0]); // только проверка
-      Ticket ticket = TicketGenerator.createTicket(in); // создать билет с нуля
-      return new RequestBodyWithTicket(args, ticket);   // упаковать вместе
+      Integer.parseInt(args[0]);
+      Ticket ticket = TicketGenerator.createTicket(in);
+      return new RequestBodyWithTicket(args, ticket);
     } catch (NumberFormatException e) {
       throw new CommandArgumentException("Не получилось привести " + args[0] + " к числу", e);
     }

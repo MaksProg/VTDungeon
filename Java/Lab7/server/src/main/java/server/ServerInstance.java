@@ -89,11 +89,11 @@ public class ServerInstance {
       if (payload instanceof Request request) {
         logger.info("Получен запрос: " + request.getCommandName());
 
-        // Обработка запроса в отдельном потоке
+        
         new Thread(() -> {
           Response response = commandManager.handleRequest(request);
 
-          // Отправка через FixedThreadPool
+
           responseSenderPool.submit(() -> {
             try {
               wrapper.sendMessage(response);

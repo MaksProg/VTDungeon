@@ -43,7 +43,7 @@ public class RemoveGreaterCommand extends Command {
       if (ticket.compareTo(compareTicket) > 0 && username.equals(ticket.getOwnerUsername())) {
         boolean removed = collectionManager.removeById(ticket.getId(), username);
         if (removed) {
-          iterator.remove(); // В памяти тоже удалим, если успешно удалено из БД
+          iterator.remove();
           removedCount++;
         }
       }
