@@ -1,15 +1,12 @@
 package server;
 
-import common.managers.CommandManager;
 import common.managers.ServerCommandManager;
-import common.managers.VenueManager;
-import server.collectionManagers.SqlCollectionManager;
-import server.userManagers.SqlUserManager;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import server.collectionManagers.SqlCollectionManager;
+import server.userManagers.SqlUserManager;
 
 public final class Server {
   private Server() {
@@ -33,30 +30,28 @@ public final class Server {
       return;
     }
 
-
     String dbHost = System.getenv("DB_HOST");
     String dbName = System.getenv("DB_NAME");
     String dbUser = System.getenv("DB_USER");
     String dbPassword = System.getenv("DB_PASSWORD");
 
     if (dbHost == null || dbName == null || dbUser == null || dbPassword == null) {
-      System.err.println("Ошибка: необходимо задать переменные окружения DB_HOST, DB_NAME, DB_USER, DB_PASSWORD.");
+      System.err.println(
+          "Ошибка: необходимо задать переменные окружения DB_HOST, DB_NAME, DB_USER, DB_PASSWORD.");
       System.exit(1);
     }
 
     try {
-      Connection connection = DriverManager.getConnection(
-              "jdbc:postgresql://" + dbHost + "/" + dbName,
-              dbUser,
-              dbPassword
-      );
-
+      Connection connection =
+          DriverManager.getConnection(
+              "jdbc:postgresql://" + dbHost + "/" + dbName, dbUser, dbPassword);
 
       SqlUserManager userManager = new SqlUserManager(connection);
       SqlCollectionManager collectionManager = new SqlCollectionManager(connection);
-      collectionManager.initTables(); 
+      collectionManager.initTables();
 
-      ServerCommandManager commandManager = new ServerCommandManager(collectionManager,userManager);
+      ServerCommandManager commandManager =
+          new ServerCommandManager(collectionManager, userManager);
       ServerInstance server = new ServerInstance(commandManager, collectionManager, userManager);
       server.run(port);
 

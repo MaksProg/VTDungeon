@@ -6,7 +6,6 @@ import common.exceptions.CommandArgumentException;
 import common.exceptions.UnknownCommandException;
 import common.network.Request;
 import common.network.RequestBody;
-
 import java.util.LinkedHashMap;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -22,7 +21,7 @@ public abstract class CommandManager {
   protected abstract void initCommands();
 
   public Request handleCommandInput(String commandLine, Scanner in, AuthCredentials authCredentials)
-          throws UnknownCommandException, CommandArgumentException {
+      throws UnknownCommandException, CommandArgumentException {
     String[] parts = commandLine.trim().split("\\s+", 2);
     String name = parts[0];
     String[] args = parts.length > 1 ? parts[1].split("\\s+") : new String[0];

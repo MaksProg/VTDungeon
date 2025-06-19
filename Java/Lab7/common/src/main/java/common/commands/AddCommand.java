@@ -8,13 +8,10 @@ import common.network.RequestBody;
 import common.network.RequestBodyWithTicket;
 import common.network.Response;
 import common.system.utils.TextColor;
-
 import java.time.ZonedDateTime;
 import java.util.Scanner;
 
-/**
- * Команда добавления нового билета в коллекцию.
- */
+/** Команда добавления нового билета в коллекцию. */
 public class AddCommand extends Command {
   private final CollectionManager collectionManager;
 
@@ -36,7 +33,7 @@ public class AddCommand extends Command {
     newTicket.setOwnerUsername(request.getAuth().username());
 
     try {
-      collectionManager.addTicket(newTicket); 
+      collectionManager.addTicket(newTicket);
       return new Response("Билет успешно добавлен (ID: " + newTicket.getId() + ")");
     } catch (Exception e) {
       return new Response(TextColor.formatError("Ошибка при добавлении билета: " + e.getMessage()));

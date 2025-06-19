@@ -8,9 +8,7 @@ import common.network.Response;
 import common.system.utils.TextColor;
 import java.util.Scanner;
 
-/**
- * Класс команды удаляющий билет с определённым ID
- */
+/** Класс команды удаляющий билет с определённым ID */
 public class RemoveByIdCommand extends Command {
   private final CollectionManager collectionManager;
 
@@ -21,7 +19,7 @@ public class RemoveByIdCommand extends Command {
 
   @Override
   public Response execute(Request request) {
-    if (request.getAuth()==null) {
+    if (request.getAuth() == null) {
       return new Response(TextColor.formatError("Ошибка: пользователь не авторизован."));
     }
 
@@ -35,7 +33,9 @@ public class RemoveByIdCommand extends Command {
       if (removed) {
         return new Response(TextColor.formatSuccess("Билет с id " + id + " удалён."));
       } else {
-        return new Response(TextColor.formatError("Не удалось удалить билет. Возможно, он не существует или принадлежит другому пользователю."));
+        return new Response(
+            TextColor.formatError(
+                "Не удалось удалить билет. Возможно, он не существует или принадлежит другому пользователю."));
       }
     } catch (NumberFormatException e) {
       return new Response(TextColor.formatError("Ошибка: id должен быть целым числом!"));

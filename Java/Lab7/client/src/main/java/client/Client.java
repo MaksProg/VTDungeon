@@ -2,10 +2,7 @@ package client;
 
 import common.managers.ClientCommandManager;
 import common.managers.CollectionManager;
-
-
 import java.net.InetSocketAddress;
-
 
 public final class Client {
   private Client() {
@@ -23,12 +20,9 @@ public final class Client {
       int port = Integer.parseInt(args[1]);
       InetSocketAddress addr = new InetSocketAddress(host, port);
 
-
       CollectionManager emptyCollectionManager = new EmptyCollectionManager();
 
-
       ClientCommandManager commandManager = new ClientCommandManager(emptyCollectionManager);
-
 
       ConsoleClient client = new ConsoleClient(addr, commandManager);
       client.run();

@@ -4,8 +4,6 @@ import common.managers.CollectionManager;
 import common.managers.ServerCommandManager;
 import common.network.Request;
 import common.network.Response;
-import server.userManagers.SqlUserManager;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +13,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
+import server.userManagers.SqlUserManager;
 
 public class ServerInstance {
   private static final Logger logger = Logger.getLogger(ServerInstance.class.getName());
@@ -26,7 +25,10 @@ public class ServerInstance {
 
   private final ExecutorService responseSenderPool = Executors.newFixedThreadPool(4);
 
-  public ServerInstance(ServerCommandManager commandManager, CollectionManager collectionManager,SqlUserManager userManager) {
+  public ServerInstance(
+      ServerCommandManager commandManager,
+      CollectionManager collectionManager,
+      SqlUserManager userManager) {
     this.commandManager = commandManager;
     this.collectionManager = collectionManager;
     this.userManager = userManager;
@@ -60,7 +62,8 @@ public class ServerInstance {
           if (key.isAcceptable()) {
             SocketChannel clientChannel = serverSocket.accept();
             clientChannel.configureBlocking(false);
-            clientChannel.register(selector, SelectionKey.OP_READ, new NioObjectChannelWrapper(clientChannel));
+            clientChannel.register(
+                selector, SelectionKey.OP_READ, new NioObjectChannelWrapper(clientChannel));
             logger.info("Новое подключение: " + clientChannel.getRemoteAddress());
           } else if (key.isReadable()) {
             handleRead(key);
@@ -89,21 +92,22 @@ public class ServerInstance {
       if (payload instanceof Request request) {
         logger.info("Получен запрос: " + request.getCommandName());
 
-        
-        new Thread(() -> {
-          Response response = commandManager.handleRequest(request);
+        new Thread(
+                () -> {
+                  Response response = commandManager.handleRequest(request);
 
-
-          responseSenderPool.submit(() -> {
-            try {
-              wrapper.sendMessage(response);
-              logger.info("Ответ отправлен клиенту");
-            } catch (IOException e) {
-              logger.warning("Не удалось отправить ответ клиенту: " + e.getMessage());
-              closeClientConnection(key, wrapper);
-            }
-          });
-        }).start();
+                  responseSenderPool.submit(
+                      () -> {
+                        try {
+                          wrapper.sendMessage(response);
+                          logger.info("Ответ отправлен клиенту");
+                        } catch (IOException e) {
+                          logger.warning("Не удалось отправить ответ клиенту: " + e.getMessage());
+                          closeClientConnection(key, wrapper);
+                        }
+                      });
+                })
+            .start();
       }
 
       wrapper.clearInBuffer();

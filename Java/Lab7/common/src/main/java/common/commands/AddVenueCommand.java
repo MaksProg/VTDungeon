@@ -6,7 +6,6 @@ import common.network.Request;
 import common.network.RequestBody;
 import common.network.RequestBodyWithVenue;
 import common.network.Response;
-
 import java.util.Scanner;
 
 public class AddVenueCommand extends Command {
@@ -31,7 +30,7 @@ public class AddVenueCommand extends Command {
       return new Response("Площадка не указана.");
     }
 
-        return new Response("Площадка добавлена: " + inputVenue.getName());
+    return new Response("Площадка добавлена: " + inputVenue.getName());
   }
 
   @Override

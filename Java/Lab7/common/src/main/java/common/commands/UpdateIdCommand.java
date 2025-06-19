@@ -32,7 +32,8 @@ public class UpdateIdCommand extends Command {
     }
 
     if (request.getAuth() == null) {
-      return new Response(TextColor.formatError("Для выполнения команды необходимо быть авторизованным."));
+      return new Response(
+          TextColor.formatError("Для выполнения команды необходимо быть авторизованным."));
     }
 
     String username = request.getAuth().username();
@@ -49,7 +50,8 @@ public class UpdateIdCommand extends Command {
     boolean success = collectionManager.updateTicketById(id, newTicket, username);
 
     if (!success) {
-      return new Response(TextColor.formatError("Билет с таким id не найден или вы не являетесь его владельцем."));
+      return new Response(
+          TextColor.formatError("Билет с таким id не найден или вы не являетесь его владельцем."));
     }
 
     return new Response(TextColor.formatSuccess("Билет успешно обновлён."));

@@ -4,7 +4,6 @@ import common.managers.CollectionManager;
 import common.network.Request;
 import common.network.RequestBody;
 import common.network.Response;
-
 import java.util.Scanner;
 
 public class ClearCommand extends Command {
@@ -23,7 +22,8 @@ public class ClearCommand extends Command {
     }
 
     int deleted = collectionManager.clearCollection(request.getAuth().username());
-    return new Response("Удалено " + deleted + " билетов, принадлежащих пользователю " + user.username() + ".");
+    return new Response(
+        "Удалено " + deleted + " билетов, принадлежащих пользователю " + user.username() + ".");
   }
 
   @Override

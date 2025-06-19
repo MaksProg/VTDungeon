@@ -16,7 +16,7 @@ public abstract class Command {
   private final String name;
   private final boolean requireAuth;
 
-  public Command(String name){
+  public Command(String name) {
     this.name = name;
     this.requireAuth = true;
   }
@@ -30,17 +30,18 @@ public abstract class Command {
     return name;
   }
 
-    public boolean requiresAuth() {
-        return requireAuth;
-    }
+  public boolean requiresAuth() {
+    return requireAuth;
+  }
 
- public RequestBody packageBody(String[] args, Scanner in) throws CommandArgumentException{
-    if (args.length != 0){
-      throw  new CommandArgumentException(this.getName(),args.length);
+  public RequestBody packageBody(String[] args, Scanner in) throws CommandArgumentException {
+    if (args.length != 0) {
+      throw new CommandArgumentException(this.getName(), args.length);
     }
     return new RequestBody(args);
- }
+  }
 
   public abstract Response execute(Request request);
- public abstract String getDescription();
+
+  public abstract String getDescription();
 }

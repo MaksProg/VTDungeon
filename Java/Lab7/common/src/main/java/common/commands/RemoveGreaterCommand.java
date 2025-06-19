@@ -3,16 +3,12 @@ package common.commands;
 import common.data.Ticket;
 import common.data.generators.TicketGenerator;
 import common.managers.CollectionManager;
-import common.managers.VenueManager;
 import common.network.*;
 import common.system.utils.TextColor;
-
 import java.util.Iterator;
 import java.util.Scanner;
 
-/**
- * Команда удаляет все билеты, превышающие заданный, принадлежащие текущему пользователю
- */
+/** Команда удаляет все билеты, превышающие заданный, принадлежащие текущему пользователю */
 public class RemoveGreaterCommand extends Command {
   private final CollectionManager collectionManager;
 
@@ -23,7 +19,7 @@ public class RemoveGreaterCommand extends Command {
 
   @Override
   public Response execute(Request request) {
-    if (request.getAuth()==null) {
+    if (request.getAuth() == null) {
       return new Response(TextColor.formatError("Ошибка: пользователь не авторизован."));
     }
 

@@ -9,8 +9,6 @@ import common.network.RequestBody;
 import common.network.RequestBodyWithVenue;
 import common.network.Response;
 import common.system.utils.TextColor;
-
-
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -47,19 +45,21 @@ public class RemoveAnyByVenueCommand extends Command {
       Ticket ticket = iterator.next();
       Venue venue = ticket.getVenue();
 
-      if (venue != null && venue.equals(inputVenue)
-              && ticket.getOwnerUsername().equals(currentUsername)) {
-          boolean deleted = collectionManager.removeById(ticket.getId(), currentUsername);
-          if (deleted) {
-            iterator.remove();
-            return new Response("Билет с указанным venue удалён.");
-          } else {
-            return new Response(TextColor.formatError("Не удалось удалить билет из базы данных."));
-          }
+      if (venue != null
+          && venue.equals(inputVenue)
+          && ticket.getOwnerUsername().equals(currentUsername)) {
+        boolean deleted = collectionManager.removeById(ticket.getId(), currentUsername);
+        if (deleted) {
+          iterator.remove();
+          return new Response("Билет с указанным venue удалён.");
+        } else {
+          return new Response(TextColor.formatError("Не удалось удалить билет из базы данных."));
+        }
       }
     }
 
-    return new Response(TextColor.formatError("Билет с таким venue, принадлежащий вам, не найден."));
+    return new Response(
+        TextColor.formatError("Билет с таким venue, принадлежащий вам, не найден."));
   }
 
   @Override

@@ -30,7 +30,7 @@
 
 
     <build>
-        <pluginManagement>
+
             <plugins>
 
                 <plugin>
@@ -47,6 +47,5 @@
                 </plugin>
 
             </plugins>
-        </pluginManagement>
     </build>
 </project>

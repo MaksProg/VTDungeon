@@ -19,7 +19,9 @@ public class EmptyCollectionManager implements CollectionManager {
   }
 
   @Override
-  public int clearCollection(String username) {return 0;}
+  public int clearCollection(String username) {
+    return 0;
+  }
 
   @Override
   public void setDequeCollection(Deque<Ticket> newCollection) {}
@@ -28,7 +30,7 @@ public class EmptyCollectionManager implements CollectionManager {
   public void addTicket(Ticket ticket) {}
 
   @Override
-  public boolean removeById(int id,String username) {
+  public boolean removeById(int id, String username) {
     return false;
   }
 
@@ -51,6 +53,4 @@ public class EmptyCollectionManager implements CollectionManager {
   public Ticket getMaxTicket() {
     return null;
   }
-
-
 }

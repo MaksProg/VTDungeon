@@ -1,7 +1,5 @@
 package common.data;
 
-
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.Objects;
@@ -47,9 +45,7 @@ public class Venue implements Serializable {
     this.address = address;
   }
 
-  public Venue() {
-
-  }
+  public Venue() {}
 
   @Override
   public String toString() {
@@ -108,11 +104,11 @@ public class Venue implements Serializable {
     this.address = address;
   }
 
-  public Location getTown(){
+  public Location getTown() {
     return address.getTown();
   }
 
-  public String getZipCode(){
+  public String getZipCode() {
     return address.getZipCode();
   }
 

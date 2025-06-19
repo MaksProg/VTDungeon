@@ -1,7 +1,6 @@
 package common.network;
 
 import common.data.auth.AuthCredentials;
-
 import java.io.Serializable;
 
 public class Request implements Serializable {
@@ -27,5 +26,4 @@ public class Request implements Serializable {
   public AuthCredentials getAuth() {
     return auth;
   }
-
 }

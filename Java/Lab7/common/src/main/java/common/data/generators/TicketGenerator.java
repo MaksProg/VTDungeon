@@ -2,26 +2,24 @@ package common.data.generators;
 
 import common.data.*;
 import common.system.InputManager;
-
 import java.util.Scanner;
 
 public class TicketGenerator {
   public static Ticket createTicket(Scanner in) {
-    String name = InputManager.promptValid(
+    String name =
+        InputManager.promptValid(
             in,
             "Введите название билета: ",
             s -> s,
             s -> !s.isEmpty(),
             "Название не может быть пустым");
 
-    Double coordX = InputManager.promptValid(
-            in,
-            "Введите координату X: ",
-            Double::parseDouble,
-            x -> true,
-            "Некорректное число");
+    Double coordX =
+        InputManager.promptValid(
+            in, "Введите координату X: ", Double::parseDouble, x -> true, "Некорректное число");
 
-    Integer coordY = InputManager.promptValid(
+    Integer coordY =
+        InputManager.promptValid(
             in,
             "Введите координату Y (> -593): ",
             Integer::parseInt,
@@ -30,14 +28,16 @@ public class TicketGenerator {
 
     Coordinates coordinates = new Coordinates(coordX, coordY);
 
-    Double price = InputManager.promptValid(
+    Double price =
+        InputManager.promptValid(
             in,
             "Введите цену (> 0): ",
             Double::parseDouble,
             p -> p > 0,
             "Цена должна быть больше 0");
 
-    TicketType ticketType = InputManager.promptValid(
+    TicketType ticketType =
+        InputManager.promptValid(
             in,
             "Введите тип билета (VIP, USUAL, BUDGETARY, CHEAP): ",
             s -> TicketType.valueOf(s.toUpperCase()),
@@ -51,7 +51,8 @@ public class TicketGenerator {
 
   private static Venue promptVenueChoice(Scanner in) {
     while (true) {
-      System.out.println("""
+      System.out.println(
+          """
           Выберите способ указания площадки:
           1. Не указывать площадку (null)
           2. Создать новую площадку
@@ -69,7 +70,7 @@ public class TicketGenerator {
           return null;
 
         case "2":
-          return VenueGenerator.createVenue(in); 
+          return VenueGenerator.createVenue(in);
 
         case "3":
           System.out.print("Введите ID существующей площадки: ");

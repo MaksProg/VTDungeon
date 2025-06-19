@@ -5,12 +5,9 @@ import common.data.Venue;
 import common.data.generators.VenueGenerator;
 import common.managers.CollectionManager;
 import common.network.*;
-
 import java.util.Scanner;
 
-/**
- * Команда, считающая количество билетов с заданным Venue (для всех пользователей).
- */
+/** Команда, считающая количество билетов с заданным Venue (для всех пользователей). */
 public class CountByVenueCommand extends Command {
   private final CollectionManager collectionManager;
 
@@ -32,7 +29,8 @@ public class CountByVenueCommand extends Command {
 
     Venue inputVenue = ((RequestBodyWithVenue) body).getVenue();
 
-    long count = collectionManager.getDequeCollection().stream()
+    long count =
+        collectionManager.getDequeCollection().stream()
             .map(Ticket::getVenue)
             .filter(venue -> venue != null && venue.equals(inputVenue))
             .count();

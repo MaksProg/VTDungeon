@@ -1,7 +1,5 @@
 package common.data;
 
-
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import common.system.utils.TicketComparator;
 import java.io.Serializable;
@@ -46,7 +44,7 @@ public class Ticket implements Comparable<Ticket>, Serializable {
   @Valid
   private TicketType type; // Поле не может быть null
 
-  @Valid private Venue venue;// Поле может быть null // Поле может быть null
+  @Valid private Venue venue; // Поле может быть null // Поле может быть null
 
   private String ownerUsername;
 
@@ -55,11 +53,11 @@ public class Ticket implements Comparable<Ticket>, Serializable {
   }
 
   public Ticket(
-          @JsonProperty("name") String name,
-          @JsonProperty("coordinates") Coordinates coordinates,
-          @JsonProperty("price") Double price,
-          @JsonProperty("type") TicketType type,
-          @JsonProperty("venue") Venue venue) {
+      @JsonProperty("name") String name,
+      @JsonProperty("coordinates") Coordinates coordinates,
+      @JsonProperty("price") Double price,
+      @JsonProperty("type") TicketType type,
+      @JsonProperty("venue") Venue venue) {
     this.name = name;
     this.coordinates = coordinates;
     this.creationDate = ZonedDateTime.now();
@@ -86,8 +84,8 @@ public class Ticket implements Comparable<Ticket>, Serializable {
         + type
         + ", venue="
         + venue
-        +", owner_username:"
-        +ownerUsername
+        + ", owner_username:"
+        + ownerUsername
         + '}';
   }
 
@@ -152,8 +150,8 @@ public class Ticket implements Comparable<Ticket>, Serializable {
     this.venue = venue;
   }
 
-    public void setOwnerUsername(String ownerUsername) {
-      this.ownerUsername = ownerUsername;
+  public void setOwnerUsername(String ownerUsername) {
+    this.ownerUsername = ownerUsername;
   }
 
   public String getOwnerUsername() {
