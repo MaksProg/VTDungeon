@@ -1,63 +1,59 @@
 package common.commands;
 
 import common.data.Ticket;
+import common.data.generators.TicketGenerator;
 import common.managers.CollectionManager;
-import common.data.auth.AuthCredentials;
-import common.network.Request;
-import common.network.RequestBody;
-import common.network.RequestBodyWithTicket;
-import common.network.Response;
+import common.network.*;
 
 import java.sql.SQLException;
-
+import java.util.Scanner;
 
 /**
- * Команда добавляет билет, если он больше максимального по сравнению.
+ * Команда добавляет билет, если он больше максимального в базе.
  */
 public class AddIfMaxCommand extends Command {
-  private final CollectionManager collectionManager;
+    private final CollectionManager collectionManager;
 
-  public AddIfMaxCommand(CollectionManager collectionManager) {
-    super("add_if_max");
-    this.collectionManager = collectionManager;
-  }
-
-  @Override
-  public Response execute(Request request) {
-    if (request.getAuth().username() == null) {
-      return new Response("Ошибка: пользователь не авторизован.");
+    public AddIfMaxCommand(CollectionManager collectionManager) {
+        super("add_if_max");
+        this.collectionManager = collectionManager;
     }
 
-    RequestBody body = request.getRequestBody();
-    if (!(body instanceof RequestBodyWithTicket)) {
-      return new Response("Ошибка: ожидался объект Ticket.");
-    }
-
-    Ticket ticket = ((RequestBodyWithTicket) body).getTicket();
-    ticket.setOwnerUsername(request.getAuth().username());
-
-    Ticket maxTicket = collectionManager.getMaxTicket();
-    if (maxTicket == null || collectionManager.getDequeCollection().isEmpty()) {
-        try {
-            collectionManager.addTicket(ticket);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+    @Override
+    public Response execute(Request request) {
+        if (request.getAuth().username() == null) {
+            return new Response("Ошибка: пользователь не авторизован.");
         }
-        return new Response("Билет добавлен (коллекция пуста).");
-    } else if (ticket.compareTo(maxTicket) > 0) {
-        try {
-            collectionManager.addTicket(ticket);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+        RequestBody body = request.getRequestBody();
+        if (!(body instanceof RequestBodyWithTicket)) {
+            return new Response("Ошибка: ожидался объект Ticket.");
         }
-        return new Response("Билет добавлен (он больше максимального).");
+
+        Ticket ticket = ((RequestBodyWithTicket) body).getTicket();
+        ticket.setOwnerUsername(request.getAuth().username());
+
+        try {
+            Ticket maxTicket = collectionManager.getMaxTicket();
+            if (maxTicket == null || ticket.compareTo(maxTicket) > 0) {
+                collectionManager.addTicket(ticket);
+                return new Response("Билет успешно добавлен: он больше максимального.");
+            } else {
+                return new Response("Билет не добавлен: он не превышает максимальный.");
+            }
+        } catch (SQLException e) {
+            return new Response("Ошибка при работе с базой данных: " + e.getMessage());
+        }
     }
 
-    return new Response("Билет не является максимальным. Добавление отменено.");
-  }
+    @Override
+    public RequestBody packageBody(String[] args, Scanner in) {
+        Ticket ticket = TicketGenerator.createTicket(in);
+        return new RequestBodyWithTicket(args, ticket);
+    }
 
-  @Override
-  public String getDescription() {
-    return "добавляет билет, если он больше максимального в коллекции";
-  }
+    @Override
+    public String getDescription() {
+        return "добавляет билет, если он больше максимального в коллекции (сравнение через базу данных)";
+    }
 }
