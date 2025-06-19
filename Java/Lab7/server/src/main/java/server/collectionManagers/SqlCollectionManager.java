@@ -260,9 +260,6 @@ public class SqlCollectionManager implements CollectionManager {
   }
 
   @Override
-  public void setDequeCollection(Deque<Ticket> newCollection) {}
-
-  @Override
   public void addTicket(Ticket ticket) throws SQLException {
     Venue venue = ticket.getVenue();
     Integer venueId = null;

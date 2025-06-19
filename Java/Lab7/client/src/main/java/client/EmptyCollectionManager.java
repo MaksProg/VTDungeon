@@ -24,9 +24,6 @@ public class EmptyCollectionManager implements CollectionManager {
   }
 
   @Override
-  public void setDequeCollection(Deque<Ticket> newCollection) {}
-
-  @Override
   public void addTicket(Ticket ticket) {}
 
   @Override

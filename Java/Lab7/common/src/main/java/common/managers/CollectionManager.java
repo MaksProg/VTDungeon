@@ -21,8 +21,6 @@ public interface CollectionManager {
 
   int clearCollection(String username);
 
-  void setDequeCollection(Deque<Ticket> newCollection);
-
   void addTicket(Ticket ticket) throws SQLException;
 
   boolean removeById(int id, String username);
