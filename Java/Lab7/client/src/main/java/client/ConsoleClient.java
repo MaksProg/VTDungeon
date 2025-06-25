@@ -27,7 +27,6 @@ public class ConsoleClient implements ClientControl {
   private final SocketAddress serverAddress;
   private final CommandManager commandManager;
   private ObjectSocketChannelWrapper channelWrapper;
-
   private AuthCredentials currentAuth = null;
 
   public ConsoleClient(SocketAddress serverAddress, CommandManager commandManager) {
@@ -49,7 +48,7 @@ public class ConsoleClient implements ClientControl {
     }
   }
 
-  private void inputLoop() {
+  public void inputLoop() {
     Scanner scanner = new Scanner(System.in);
 
     while (isRunning) {
@@ -116,7 +115,7 @@ public class ConsoleClient implements ClientControl {
     }
   }
 
-  private Response waitForResponse() throws IOException {
+  Response waitForResponse() throws IOException {
     long startTime = System.currentTimeMillis();
     int secondsPassed = 0;
 
@@ -141,7 +140,7 @@ public class ConsoleClient implements ClientControl {
     return null;
   }
 
-  private void executeScript(String path) {
+  void executeScript(String path) {
     if (path == null || path.isBlank()) {
       System.out.println("Неверные аргументы команды");
       return;

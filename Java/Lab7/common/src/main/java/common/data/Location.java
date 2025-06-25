@@ -49,6 +49,18 @@ public class Location implements Serializable {
     return Objects.equals(x, location.x) && Objects.equals(y, location.y);
   }
 
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setX(long x) {
+    this.x = x;
+  }
+
+  public void setY(long y) {
+    this.y = y;
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(x, y);

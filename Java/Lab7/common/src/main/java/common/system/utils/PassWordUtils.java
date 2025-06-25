@@ -5,6 +5,9 @@ import java.security.MessageDigest;
 
 public class PassWordUtils {
   public static String hashPassword(String password, String salt) {
+    if (password == null || salt == null) {
+      throw new RuntimeException("Пароль и соль не должны быть null");
+    }
     try {
       MessageDigest messageDigest = MessageDigest.getInstance("SHA-224");
       byte[] hash = messageDigest.digest((password + salt).getBytes(StandardCharsets.UTF_8));

@@ -40,6 +40,10 @@ public class UpdateIdCommand extends Command {
     String[] args = requestBody.getArgs();
     Ticket newTicket = requestBody.getTicket();
 
+    if (newTicket == null) {
+      return new Response(TextColor.formatError("Не передан билет для обновления."));
+    }
+
     int id;
     try {
       id = Integer.parseInt(args[0]);

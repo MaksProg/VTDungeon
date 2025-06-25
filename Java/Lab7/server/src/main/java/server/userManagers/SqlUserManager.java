@@ -73,14 +73,22 @@ public class SqlUserManager implements UserManager {
 
     try (PreparedStatement statement =
         connection.prepareStatement(
-            "INSERT INTO users (username, password, salt) VALUES (?, ?, ?) RETURNING id")) {
+            "INSERT INTO users (username, password, salt) VALUES (?, ?, ?)",
+            Statement.RETURN_GENERATED_KEYS)) {
+
       statement.setString(1, auth.username());
       statement.setString(2, hash);
       statement.setString(3, salt);
-      ResultSet rs = statement.executeQuery();
-      if (rs.next()) return rs.getInt(1);
+
+      int affected = statement.executeUpdate();
+      if (affected == 0) return null;
+
+      try (ResultSet rs = statement.getGeneratedKeys()) {
+        if (rs.next()) return rs.getInt(1);
+      }
+
     } catch (SQLException e) {
-      logger.warning("Ошибка при регистрации пользователя");
+      logger.warning("Ошибка при регистрации пользователя: " + e.getMessage());
     }
     return null;
   }
