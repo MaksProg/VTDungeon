@@ -33,8 +33,8 @@ public class NioObjectChannelWrapper {
   private static final int SIZE_BYTES = Integer.BYTES;
 
   private final SocketChannel channel;
-  private final ByteBuffer sizeBuffer = ByteBuffer.allocate(SIZE_BYTES);
-  private ByteBuffer payloadBuffer = null;
+  final ByteBuffer sizeBuffer = ByteBuffer.allocate(SIZE_BYTES);
+  ByteBuffer payloadBuffer = null;
 
   /**
    * Создаёт обёртку вокруг заданного {@link SocketChannel}.

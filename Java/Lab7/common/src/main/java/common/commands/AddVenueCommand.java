@@ -16,7 +16,7 @@ public class AddVenueCommand extends Command {
 
   @Override
   public Response execute(Request request) {
-    if (request.getAuth().username() == null) {
+    if (request.getAuth() == null || request.getAuth().username() == null) {
       return new Response("Ошибка: пользователь не авторизован.");
     }
 
