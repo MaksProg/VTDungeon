@@ -6,7 +6,6 @@ import common.network.Request;
 import common.network.RequestBodyWithHistory;
 import common.network.Response;
 import common.system.InputManager;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -89,7 +88,8 @@ public class ConsoleClient implements ClientControl {
         String[] parts = commandLine.trim().split("\\s+");
         if (parts[0].equals("history")) {
           commandManager.addToHistory("history");
-          request = new Request(
+          request =
+              new Request(
                   "history",
                   new RequestBodyWithHistory(new String[0], commandManager.getHistory()));
         } else if (parts[0].equals("execute_script")) {
@@ -103,7 +103,6 @@ public class ConsoleClient implements ClientControl {
         } else {
           request = commandManager.handleCommandInput(commandLine, scanner);
         }
-
 
         if (request != null) {
           channelWrapper.sendMessage(request);
@@ -173,7 +172,8 @@ public class ConsoleClient implements ClientControl {
       pathToScript = Paths.get(path).toAbsolutePath().normalize();
 
       if (scriptsNames.contains(pathToScript)) {
-        System.out.println("Один и тот же скрипт не может выполняться рекурсивно: " + pathToScript.getFileName());
+        System.out.println(
+            "Один и тот же скрипт не может выполняться рекурсивно: " + pathToScript.getFileName());
         return;
       }
 
@@ -183,7 +183,6 @@ public class ConsoleClient implements ClientControl {
       }
 
       scriptsNames.add(pathToScript);
-
 
       Scanner originalScanner = InputManager.getScanner();
       Scanner fileScanner = new Scanner(new FileInputStream(pathToScript.toFile()));
@@ -240,9 +239,6 @@ public class ConsoleClient implements ClientControl {
       System.out.println("Проверьте путь к файлу. В нём не должно быть лишних символов");
     }
   }
-
-
-
 
   /** Останавливает работу клиента, прерывая основной цикл ввода команд. */
   @Override
