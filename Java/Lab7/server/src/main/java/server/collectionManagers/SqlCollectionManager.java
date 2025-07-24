@@ -79,7 +79,7 @@ public class SqlCollectionManager implements CollectionManager {
     }
   }
 
-  private Ticket mapRowToTicket(ResultSet rs) {
+  Ticket mapRowToTicket(ResultSet rs) {
     try {
       int id = rs.getInt("id");
       String name = rs.getString("name");
@@ -283,9 +283,10 @@ public class SqlCollectionManager implements CollectionManager {
     String insertTicketSQL =
         "INSERT INTO tickets "
             + "(name, coordinate_x, coordinate_y, creation_date, price, type, owner_username, venue_id) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    try (PreparedStatement ticketStmt = conn.prepareStatement(insertTicketSQL)) {
+    try (PreparedStatement ticketStmt =
+        conn.prepareStatement(insertTicketSQL, Statement.RETURN_GENERATED_KEYS)) {
       ticket.setCreationDate(ZonedDateTime.now());
       prepareTicketStatement(ticketStmt, ticket, 0);
 
@@ -295,9 +296,11 @@ public class SqlCollectionManager implements CollectionManager {
         ticketStmt.setNull(8, Types.INTEGER);
       }
 
-      try (ResultSet rs = ticketStmt.executeQuery()) {
+      ticketStmt.executeUpdate();
+
+      try (ResultSet rs = ticketStmt.getGeneratedKeys()) {
         if (rs.next()) {
-          int ticketId = rs.getInt("id");
+          int ticketId = rs.getInt(1);
           ticket.setId(ticketId);
         }
       }
@@ -316,16 +319,18 @@ public class SqlCollectionManager implements CollectionManager {
 
     String insertVenueSQL =
         "INSERT INTO venues (name, capacity, type, zip_code, x, y, town_name) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
-    try (PreparedStatement stmt = conn.prepareStatement(insertVenueSQL)) {
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    try (PreparedStatement stmt =
+        conn.prepareStatement(insertVenueSQL, Statement.RETURN_GENERATED_KEYS)) {
       prepareVenueStatement(stmt, venue, 0);
-      try (ResultSet rs = stmt.executeQuery()) {
+      stmt.executeUpdate();
+      try (ResultSet rs = stmt.getGeneratedKeys()) {
         if (rs.next()) {
-          int newId = rs.getInt("id");
+          int newId = rs.getInt(1);
           venue.setId(newId);
           return newId;
         } else {
-          throw new SQLException("Failed to insert venue");
+          throw new SQLException("Не получилось вставить площадку");
         }
       }
     }
