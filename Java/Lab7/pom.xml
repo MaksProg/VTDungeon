@@ -105,6 +105,26 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>get-jacococli</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>get</goal>
+                        </goals>
+                        <configuration>
+                            <artifact>org.jacoco:jacococli:0.8.12:jar:nodeps</artifact>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <destFileName>jacococli.jar</destFileName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
