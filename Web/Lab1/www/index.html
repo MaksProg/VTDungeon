@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ЛР — попадание точки в область</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <!-- Табличная шапка -->
+  <table class="header" role="presentation">
+    <tr>
+      <td>
+        <div id="student-name">Родионов Максим Артемович</div>
+        <div id="student-meta">Группа: P3231 • Вариант: 467244</div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Основная область -->
+  <table class="layout" role="presentation">
+    <tr>
+      <!-- Левая колонка: форма + график -->
+      <td class="left-col">
+        <form id="check-form" action="/api" method="get" novalidate>
+          <table class="form-table">
+            <caption>Параметры</caption>
+
+            <tr>
+              <td><label for="x-select">X:</label></td>
+              <td>
+                <select id="x-select" name="x" required>
+                  <option value="">-- выберите X --</option>
+                  <option value="-3">-3</option>
+                  <option value="-2">-2</option>
+                  <option value="-1">-1</option>
+                  <option value="0">0</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </td>
+            </tr>
+
+            <tr>
+              <td><label for="y-input">Y:</label></td>
+              <td>
+                <input id="y-input" name="y" type="text" placeholder="-5..5" required />
+                <div class="hint">Число с точкой или запятой, в диапазоне −5…5</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td><span>R:</span></td>
+              <td>
+                <div class="r-checkboxes">
+                  <label><input type="checkbox" name="r" value="1">1</label>
+                  <label><input type="checkbox" name="r" value="2">2</label>
+                  <label><input type="checkbox" name="r" value="3">3</label>
+                  <label><input type="checkbox" name="r" value="4">4</label>
+                  <label><input type="checkbox" name="r" value="5">5</label>
+                </div>
+                <div class="hint">Отметьте ровно один чекбокс.</div>
+              </td>
+            </tr>
+
+            <tr>
+              <td></td>
+              <td>
+                <button id="submit-btn" type="submit">Проверить</button>
+                <button id="reset-btn" type="button">Сбросить</button>
+              </td>
+            </tr>
+          </table>
+        </form>
+
+        <!-- График -->
+        <div class="canvas-wrapper">
+          <canvas id="graph" width="400" height="400"></canvas>
+        </div>
+      </td>
+
+      <!-- Правая колонка: результаты -->
+      <td class="right-col">
+        <table class="results" id="results-table">
+          <caption>История проверок</caption>
+          <thead>
+            <tr>
+              <th>X</th><th>Y</th><th>R</th><th>Попадание</th><th>Время сервера</th><th>Время выполнения (мс)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS заполнит -->
+          </tbody>
+        </table>
+
+        <table class="meta" role="presentation">
+          <tr>
+            <td>Локальное время:</td>
+            <td id="local-time">—</td>
+          </tr>
+          <tr>
+            <td>Последняя ошибка:</td>
+            <td id="last-error">нет</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
