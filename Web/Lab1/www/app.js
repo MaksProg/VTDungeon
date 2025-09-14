@@ -84,13 +84,7 @@ function showError(msg) {
   document.getElementById("last-error").textContent = msg || "нет";
 }
 
-function getSelectedR() {
-  const checked = document.querySelectorAll("input[name='r']:checked");
-  if (checked.length === 1) return parseFloat(checked[0].value);
-  return null;
-}
-
-function validate(x, y, r) {
+function validate(x, y, checked) {
   if (isNaN(x)) {
     showError("Выберите X!");
     return false;
@@ -99,8 +93,8 @@ function validate(x, y, r) {
     showError("Y должен быть числом от -5 до 5.");
     return false;
   }
-  if (r === null || isNaN(r)) {
-    showError("Выберите ровно одно значение R!");
+  if (checked.length === 0) {
+    showError("Выберите хотя бы одно значение R!");
     return false;
   }
   showError(null);
@@ -126,56 +120,43 @@ function updateResultsTable(results) {
     new Date().toLocaleTimeString();
 }
 
-// ----------------- События -----------------
-canvas.addEventListener("click", (e) => {
-  const rect = canvas.getBoundingClientRect();
-  const x = (e.clientX - rect.left - center) / scale;
-  const y = (center - (e.clientY - rect.top)) / scale;
-
-  drawScene();
-  drawPoint(x, y);
-});
-
-document.querySelectorAll("input[name='r']").forEach((box) => {
-  box.addEventListener("change", (e) => {
-    if (e.target.checked) {
-      document.querySelectorAll("input[name='r']").forEach((other) => {
-        if (other !== e.target) other.checked = false;
-      });
-    }
-  });
-});
-
 // ----------------- Сабмит формы с измерением времени -----------------
 document.getElementById("check-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const x = parseFloat(document.getElementById("x-select").value);
   const y = parseFloat(document.getElementById("y-input").value.replace(",", "."));
-  const r = getSelectedR();
+  const checked = document.querySelectorAll("input[name='r']:checked");
 
-  if (!validate(x, y, r)) return;
-  R = r;
+  if (!validate(x, y, checked)) return;
 
-  drawScene();
-  drawPoint(x, y, "blue");
+  const allResults = [];
 
-  try {
-    const start = performance.now(); // <--- начало измерения
-    const resp = await fetch(`http://127.0.0.1:9000/api?x=${x}&y=${y}&r=${r}`);
-    const end = performance.now(); // <--- конец измерения
-    const msExec = Math.round(end - start);
+  for (const box of checked) {
+    const r = parseFloat(box.value);
+    R = r;
 
-    if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
-    const data = await resp.json();
+    drawScene();
+    drawPoint(x, y, "blue");
 
-    // Подставляем ms_exec в каждый результат
-    data.result = data.result.map((row) => ({ ...row, ms_exec: msExec }));
+    try {
+      const start = performance.now();
+      const resp = await fetch(`http://127.0.0.1:9000/api?x=${x}&y=${y}&r=${r}`);
+      const end = performance.now();
+      const msExec = Math.round(end - start);
 
-    updateResultsTable(data.result);
-  } catch (err) {
-    showError(err.message);
+      if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
+      const data = await resp.json();
+
+      // Подставляем ms_exec в каждый результат
+      data.result = data.result.map((row) => ({ ...row, ms_exec: msExec }));
+      allResults.push(...data.result);
+    } catch (err) {
+      showError(err.message);
+    }
   }
+
+  updateResultsTable(allResults);
 });
 
 // ----------------- Первый вызов -----------------
