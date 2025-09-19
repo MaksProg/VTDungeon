@@ -82,21 +82,11 @@
         </div>
       </td>
 
-      <!-- Правая колонка: результаты -->
+      <!-- Правая колонка: блок статуса сверху + история снизу -->
       <td class="right-col">
-        <table class="results" id="results-table">
-          <caption>История проверок</caption>
-          <thead>
-            <tr>
-              <th>X</th><th>Y</th><th>R</th><th>Попадание</th><th>Время сервера</th><th>Время выполнения (мс)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- JS заполнит -->
-          </tbody>
-        </table>
-
+        <!-- Блок статуса -->
         <table class="meta" role="presentation">
+          <caption>Статус</caption>
           <tr>
             <td>Локальное время:</td>
             <td id="local-time">—</td>
@@ -105,6 +95,24 @@
             <td>Последняя ошибка:</td>
             <td id="last-error">нет</td>
           </tr>
+        </table>
+
+        <!-- Таблица истории -->
+        <table class="results" id="results-table">
+          <caption>История проверок</caption>
+          <thead>
+            <tr>
+              <th>X</th>
+              <th>Y</th>
+              <th>R</th>
+              <th>Попадание</th>
+              <th>Время сервера</th>
+              <th>Время выполнения (мс)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS заполнит -->
+          </tbody>
         </table>
       </td>
     </tr>

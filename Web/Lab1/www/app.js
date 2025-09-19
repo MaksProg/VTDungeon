@@ -6,13 +6,15 @@ canvas.height = size;
 const center = size / 2;
 const scale = 40;
 
+const MAX_HISTORY = 10;
+
 let R = 2;
 
 // ----------------- Рисовка -----------------
 function drawScene() {
   ctx.clearRect(0, 0, size, size);
 
-  // ----------------- Области -----------------
+  // --- Области ---
   ctx.fillStyle = "rgba(0, 128, 255, 0.5)";
   ctx.beginPath();
   ctx.moveTo(center, center);
@@ -25,7 +27,7 @@ function drawScene() {
   ctx.closePath();
   ctx.fill();
 
-  // ----------------- Оси -----------------
+  // --- Оси ---
   ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -46,7 +48,7 @@ function drawScene() {
 
   ctx.stroke();
 
-  // ----------------- Деления -----------------
+  // --- Деления ---
   ctx.fillStyle = "black";
   ctx.font = "12px Arial";
   ctx.textAlign = "center";
@@ -101,26 +103,26 @@ function validate(x, y, checked) {
   return true;
 }
 
-// ----------------- Работа с таблицей -----------------
-function updateResultsTable(results) {
+// ----------------- Добавление новой строки в таблицу -----------------
+function addRowToTable(row) {
   const tbody = document.querySelector("#results-table tbody");
-  tbody.innerHTML = "";
-  results.forEach((row) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${row.x}</td>
-      <td>${row.y}</td>
-      <td>${row.r}</td>
-      <td>${row.hit ? "✅" : "❌"}</td>
-      <td>${row.time}</td>
-      <td>${row.ms_exec}</td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById("local-time").textContent =
-    new Date().toLocaleTimeString();
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${row.x}</td>
+    <td>${row.y}</td>
+    <td>${row.r}</td>
+    <td>${row.hit ? "✅" : "❌"}</td>
+    <td>${row.time}</td>
+    <td>${row.ms_exec}</td>`;
+
+  tbody.prepend(tr);
+
+  while (tbody.rows.length > MAX_HISTORY) {
+    tbody.deleteRow(tbody.rows.length - 1);
+  }
 }
 
-// ----------------- Сабмит формы с измерением времени -----------------
+// ----------------- Сабмит формы -----------------
 document.getElementById("check-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -129,8 +131,6 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
   const checked = document.querySelectorAll("input[name='r']:checked");
 
   if (!validate(x, y, checked)) return;
-
-  const allResults = [];
 
   for (const box of checked) {
     const r = parseFloat(box.value);
@@ -148,15 +148,16 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
       if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
       const data = await resp.json();
 
-      // Подставляем ms_exec в каждый результат
-      data.result = data.result.map((row) => ({ ...row, ms_exec: msExec }));
-      allResults.push(...data.result);
+      // берём только последнюю точку из истории сервера
+      const last = data.result[data.result.length - 1];
+      last.ms_exec = msExec;
+
+      addRowToTable(last);
+      document.getElementById("local-time").textContent = new Date().toLocaleTimeString();
     } catch (err) {
       showError(err.message);
     }
   }
-
-  updateResultsTable(allResults);
 });
 
 // ----------------- Первый вызов -----------------
