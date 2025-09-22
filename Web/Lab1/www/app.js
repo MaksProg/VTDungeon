@@ -141,7 +141,7 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
 
     try {
       const start = performance.now();
-      const resp = await fetch(`http://127.0.0.1:9000/api?x=${x}&y=${y}&r=${r}`);
+      const resp = await fetch(`/api?x=${x}&y=${y}&r=${r}`);
       const end = performance.now();
       const msExec = Math.round(end - start);
 

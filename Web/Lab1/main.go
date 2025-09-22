@@ -51,6 +51,7 @@ func hit(x, y, r float64) bool {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
@@ -73,7 +74,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("New request: x=%.2f, y=%.2f, r=%.2f", x, y, radius)
 
-	start := time.Now()
 	res := Result{
 		X:      x,
 		Y:      y,
@@ -108,7 +108,7 @@ func main() {
 	fs := http.FileServer(http.Dir("./www"))
 	mux.Handle("/", fs)
 
-	addr := "127.0.0.1:9000"
+	addr := ":9000"
 	l, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("listen: %v", err)
