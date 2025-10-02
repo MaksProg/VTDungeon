@@ -103,8 +103,36 @@ function validate(x, y, checked) {
   return true;
 }
 
+// ----------------- Работа с cookies -----------------
+function saveTableToCookies() {
+  const rows = [];
+  document.querySelectorAll("#results-table tbody tr").forEach(tr => {
+    const cells = tr.querySelectorAll("td");
+    rows.push({
+      x: cells[0].textContent,
+      y: cells[1].textContent,
+      r: cells[2].textContent,
+      hit: cells[3].textContent,
+      time: cells[4].textContent,
+      ms_exec: cells[5].textContent
+    });
+  });
+  document.cookie = `table=${encodeURIComponent(JSON.stringify(rows))}; path=/; max-age=86400`;
+}
+
+function loadTableFromCookies() {
+  const cookie = document.cookie.split("; ").find(row => row.startsWith("table="));
+  if (!cookie) return;
+  const data = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+  data.forEach(row => addRowToTable(row, false));
+}
+
+function clearCookies() {
+  document.cookie = "table=; path=/; max-age=0";
+}
+
 // ----------------- Добавление новой строки в таблицу -----------------
-function addRowToTable(row) {
+function addRowToTable(row, save = true) {
   const tbody = document.querySelector("#results-table tbody");
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -120,6 +148,8 @@ function addRowToTable(row) {
   while (tbody.rows.length > MAX_HISTORY) {
     tbody.deleteRow(tbody.rows.length - 1);
   }
+
+  if (save) saveTableToCookies();
 }
 
 // ----------------- Сабмит формы -----------------
@@ -148,7 +178,6 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
       if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
       const data = await resp.json();
 
-      // берём только последнюю точку из истории сервера
       const last = data.result[data.result.length - 1];
       last.ms_exec = msExec;
 
@@ -160,5 +189,13 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
   }
 });
 
+// ----------------- Кнопка сброса -----------------
+document.getElementById("reset-btn").addEventListener("click", () => {
+  const tbody = document.querySelector("#results-table tbody");
+  tbody.innerHTML = "";
+  clearCookies();
+});
+
 // ----------------- Первый вызов -----------------
 drawScene();
+loadTableFromCookies();
