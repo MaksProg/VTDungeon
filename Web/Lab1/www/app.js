@@ -7,11 +7,11 @@ const center = size / 2;
 const scale = 40;
 
 const MAX_HISTORY = 10;
-
 let R = 2;
+let history = [];
 
 // ----------------- Рисовка -----------------
-function drawScene() {
+function drawScene(currentPoints = []) {
   ctx.clearRect(0, 0, size, size);
 
   // --- Области ---
@@ -31,21 +31,8 @@ function drawScene() {
   ctx.strokeStyle = "black";
   ctx.lineWidth = 2;
   ctx.beginPath();
-
-  // OX
-  ctx.moveTo(0, center);
-  ctx.lineTo(size, center);
-  ctx.moveTo(size - 10, center - 5);
-  ctx.lineTo(size, center);
-  ctx.lineTo(size - 10, center + 5);
-
-  // OY
-  ctx.moveTo(center, size);
-  ctx.lineTo(center, 0);
-  ctx.moveTo(center - 5, 10);
-  ctx.lineTo(center, 0);
-  ctx.lineTo(center + 5, 10);
-
+  ctx.moveTo(0, center); ctx.lineTo(size, center); // OX
+  ctx.moveTo(center, size); ctx.lineTo(center, 0); // OY
   ctx.stroke();
 
   // --- Деления ---
@@ -53,28 +40,26 @@ function drawScene() {
   ctx.font = "12px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-
   for (let i = -5; i <= 5; i++) {
     if (i === 0) continue;
 
-    // X деления
     ctx.beginPath();
     ctx.moveTo(center + i * scale, center - 5);
     ctx.lineTo(center + i * scale, center + 5);
     ctx.stroke();
     ctx.fillText(i, center + i * scale, center + 15);
 
-    // Y деления
     ctx.beginPath();
     ctx.moveTo(center - 5, center - i * scale);
     ctx.lineTo(center + 5, center - i * scale);
     ctx.stroke();
     ctx.fillText(i, center - 15, center - i * scale);
   }
+  currentPoints.forEach(p => drawPoint(p.x, p.y, "blue"));
 }
 
-// ----------------- Рисуем точки -----------------
-function drawPoint(x, y, color = "red") {
+// ----------------- Рисуем точку -----------------
+function drawPoint(x, y, color = "blue") {
   ctx.beginPath();
   ctx.arc(center + x * scale, center - y * scale, 4, 0, Math.PI * 2);
   ctx.fillStyle = color;
@@ -87,52 +72,15 @@ function showError(msg) {
 }
 
 function validate(x, y, checked) {
-  if (isNaN(x)) {
-    showError("Выберите X!");
-    return false;
-  }
-  if (isNaN(y) || y < -5 || y > 5) {
-    showError("Y должен быть числом от -5 до 5.");
-    return false;
-  }
-  if (checked.length === 0) {
-    showError("Выберите хотя бы одно значение R!");
-    return false;
-  }
+  if (isNaN(x)) return showError("Выберите X!");
+  if (isNaN(y) || y < -5 || y > 5) return showError("Y должен быть числом от -5 до 5.");
+  if (checked.length === 0) return showError("Выберите хотя бы одно значение R!");
   showError(null);
   return true;
 }
 
-// ----------------- Работа с cookies -----------------
-function saveTableToCookies() {
-  const rows = [];
-  document.querySelectorAll("#results-table tbody tr").forEach(tr => {
-    const cells = tr.querySelectorAll("td");
-    rows.push({
-      x: cells[0].textContent,
-      y: cells[1].textContent,
-      r: cells[2].textContent,
-      hit: cells[3].textContent,
-      time: cells[4].textContent,
-      ms_exec: cells[5].textContent
-    });
-  });
-  document.cookie = `table=${encodeURIComponent(JSON.stringify(rows))}; path=/; max-age=86400`;
-}
-
-function loadTableFromCookies() {
-  const cookie = document.cookie.split("; ").find(row => row.startsWith("table="));
-  if (!cookie) return;
-  const data = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
-  data.forEach(row => addRowToTable(row, false));
-}
-
-function clearCookies() {
-  document.cookie = "table=; path=/; max-age=0";
-}
-
-// ----------------- Добавление новой строки в таблицу -----------------
-function addRowToTable(row, save = true) {
+// ----------------- Добавление строки в таблицу -----------------
+function addRowToTable(row) {
   const tbody = document.querySelector("#results-table tbody");
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -142,14 +90,27 @@ function addRowToTable(row, save = true) {
     <td>${row.hit ? "✅" : "❌"}</td>
     <td>${row.time}</td>
     <td>${row.ms_exec}</td>`;
-
   tbody.prepend(tr);
 
   while (tbody.rows.length > MAX_HISTORY) {
     tbody.deleteRow(tbody.rows.length - 1);
   }
+}
 
-  if (save) saveTableToCookies();
+// ----------------- Получение истории с сервера -----------------
+async function fetchHistory() {
+  try {
+    const resp = await fetch("/history");
+    if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
+    const data = await resp.json();
+    history = Array.isArray(data.result) ? data.result.slice(-MAX_HISTORY) : [];
+
+    const tbody = document.querySelector("#results-table tbody");
+    tbody.innerHTML = "";
+    history.forEach(addRowToTable);
+  } catch (err) {
+    showError(err.message);
+  }
 }
 
 // ----------------- Сабмит формы -----------------
@@ -166,22 +127,25 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
     const r = parseFloat(box.value);
     R = r;
 
-    drawScene();
-    drawPoint(x, y, "blue");
-
     try {
       const start = performance.now();
       const resp = await fetch(`/api?x=${x}&y=${y}&r=${r}`);
       const end = performance.now();
-      const msExec = Math.round(end - start);
-
       if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
       const data = await resp.json();
+      const last = Array.isArray(data.result) ? data.result[data.result.length - 1] : null;
+      if (!last) continue;
 
-      const last = data.result[data.result.length - 1];
-      last.ms_exec = msExec;
+      last.ms_exec = Math.round(end - start);
 
-      addRowToTable(last);
+      history.push(last);
+      if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
+
+      const tbody = document.querySelector("#results-table tbody");
+      tbody.innerHTML = "";
+      history.forEach(addRowToTable);
+
+      drawScene([last]); // рисуем только последнюю точку
       document.getElementById("local-time").textContent = new Date().toLocaleTimeString();
     } catch (err) {
       showError(err.message);
@@ -190,12 +154,13 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
 });
 
 // ----------------- Кнопка сброса -----------------
-document.getElementById("reset-btn").addEventListener("click", () => {
+document.getElementById("reset-btn").addEventListener("click", async () => {
   const tbody = document.querySelector("#results-table tbody");
   tbody.innerHTML = "";
-  clearCookies();
+  history = [];
+  drawScene();
 });
 
-// ----------------- Первый вызов -----------------
+// ----------------- Инициализация -----------------
+fetchHistory();
 drawScene();
-loadTableFromCookies();

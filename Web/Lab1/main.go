@@ -97,22 +97,42 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+func historyHandler(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+    if r.Method != http.MethodGet {
+        http.Error(w, "Only GET allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    mu.Lock()
+    resp := Response{
+        ReceivedAt: time.Now().Format(time.RFC3339),
+        Result:     append([]Result(nil), history...),
+    }
+    mu.Unlock()
+
+    _ = json.NewEncoder(w).Encode(resp)
+}
+
 func isFinite(v float64) bool {
 	return !math.IsNaN(v) && !math.IsInf(v, 0)
 }
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/api", handler)
+    mux := http.NewServeMux()
+    mux.HandleFunc("/api", handler)       
+    mux.HandleFunc("/history", historyHandler) 
 
-	fs := http.FileServer(http.Dir("./www"))
-	mux.Handle("/", fs)
+    fs := http.FileServer(http.Dir("./www"))
+    mux.Handle("/", fs)
 
-	addr := ":9000"
-	l, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatalf("listen: %v", err)
-	}
-	log.Printf("HTTP server listening on %s", addr)
-	log.Fatal(http.Serve(l, mux))
+    addr := ":9000"
+    l, err := net.Listen("tcp", addr)
+    if err != nil {
+        log.Fatalf("listen: %v", err)
+    }
+    log.Printf("HTTP server listening on %s", addr)
+    log.Fatal(http.Serve(l, mux))
 }
