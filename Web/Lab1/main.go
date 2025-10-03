@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -24,11 +23,6 @@ type Response struct {
 	ReceivedAt string   `json:"received_at"`
 	Result     []Result `json:"result"`
 }
-
-var (
-	mu      sync.Mutex
-	history []Result
-)
 
 func hit(x, y, r float64) bool {
 	if r <= 0 || math.IsNaN(r) || math.IsInf(r, 0) {
@@ -50,9 +44,31 @@ func hit(x, y, r float64) bool {
 	return false
 }
 
+func loadHistory(r *http.Request) []Result {
+	c, err := r.Cookie("history")
+	if err != nil {
+		return nil
+	}
+	var hist []Result
+	_ = json.Unmarshal([]byte(c.Value), &hist)
+	return hist
+}
+
+func saveHistory(w http.ResponseWriter, hist []Result) {
+	data, _ := json.Marshal(hist)
+	http.SetCookie(w, &http.Cookie{
+		Name:     "history",
+		Value:    string(data),
+		Path:     "/",
+		HttpOnly: false, 
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "http://127.0.0.1:5500")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	if r.Method != http.MethodGet {
@@ -72,8 +88,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("New request: x=%.2f, y=%.2f, r=%.2f", x, y, radius)
-
 	res := Result{
 		X:      x,
 		Y:      y,
@@ -83,18 +97,31 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		ExecMs: int(time.Since(start).Milliseconds()),
 	}
 
-	mu.Lock()
+	history := loadHistory(r)
 	history = append(history, res)
 	if len(history) > 1000 {
 		history = history[len(history)-1000:]
 	}
+
+	saveHistory(w, history)
+
 	resp := Response{
 		ReceivedAt: time.Now().Format(time.RFC3339),
-		Result:     append([]Result(nil), history...),
+		Result:     history,
 	}
-	mu.Unlock()
 
 	_ = json.NewEncoder(w).Encode(resp)
+}
+
+func resetHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "history",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Unix(0, 0),
+	})
+	w.Write([]byte(`{"status":"reset done"}`))
 }
 
 func isFinite(v float64) bool {
@@ -104,6 +131,7 @@ func isFinite(v float64) bool {
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api", handler)
+	mux.HandleFunc("/reset", resetHandler)
 
 	fs := http.FileServer(http.Dir("./www"))
 	mux.Handle("/", fs)

@@ -103,53 +103,22 @@ function validate(x, y, checked) {
   return true;
 }
 
-// ----------------- Работа с cookies -----------------
-function saveTableToCookies() {
-  const rows = [];
-  document.querySelectorAll("#results-table tbody tr").forEach(tr => {
-    const cells = tr.querySelectorAll("td");
-    rows.push({
-      x: cells[0].textContent,
-      y: cells[1].textContent,
-      r: cells[2].textContent,
-      hit: cells[3].textContent,
-      time: cells[4].textContent,
-      ms_exec: cells[5].textContent
-    });
-  });
-  document.cookie = `table=${encodeURIComponent(JSON.stringify(rows))}; path=/; max-age=86400`;
-}
-
-function loadTableFromCookies() {
-  const cookie = document.cookie.split("; ").find(row => row.startsWith("table="));
-  if (!cookie) return;
-  const data = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
-  data.forEach(row => addRowToTable(row, false));
-}
-
-function clearCookies() {
-  document.cookie = "table=; path=/; max-age=0";
-}
-
-// ----------------- Добавление новой строки в таблицу -----------------
-function addRowToTable(row, save = true) {
+// ----------------- Таблица -----------------
+function renderTable(rows) {
   const tbody = document.querySelector("#results-table tbody");
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td>${row.x}</td>
-    <td>${row.y}</td>
-    <td>${row.r}</td>
-    <td>${row.hit ? "✅" : "❌"}</td>
-    <td>${row.time}</td>
-    <td>${row.ms_exec}</td>`;
+  tbody.innerHTML = "";
 
-  tbody.prepend(tr);
-
-  while (tbody.rows.length > MAX_HISTORY) {
-    tbody.deleteRow(tbody.rows.length - 1);
-  }
-
-  if (save) saveTableToCookies();
+  rows.slice(-MAX_HISTORY).reverse().forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.x}</td>
+      <td>${row.y}</td>
+      <td>${row.r}</td>
+      <td>${row.hit ? "✅" : "❌"}</td>
+      <td>${row.time}</td>
+      <td>${row.ms_exec}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
 // ----------------- Сабмит формы -----------------
@@ -178,11 +147,10 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
       if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
       const data = await resp.json();
 
-      const last = data.result[data.result.length - 1];
-      last.ms_exec = msExec;
+      renderTable(data.result);
 
-      addRowToTable(last);
       document.getElementById("local-time").textContent = new Date().toLocaleTimeString();
+      console.log("Клиентское время:", msExec, "мс, сервер:", data.result.at(-1).ms_exec, "мс");
     } catch (err) {
       showError(err.message);
     }
@@ -190,12 +158,27 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
 });
 
 // ----------------- Кнопка сброса -----------------
-document.getElementById("reset-btn").addEventListener("click", () => {
-  const tbody = document.querySelector("#results-table tbody");
-  tbody.innerHTML = "";
-  clearCookies();
+document.getElementById("reset-btn").addEventListener("click", async () => {
+  try {
+    const resp = await fetch("/reset", { method: "POST" });
+    if (!resp.ok) throw new Error("Ошибка сброса");
+    renderTable([]);
+  } catch (err) {
+    showError(err.message);
+  }
 });
 
 // ----------------- Первый вызов -----------------
 drawScene();
-loadTableFromCookies();
+
+(async () => {
+  try {
+    const resp = await fetch("/api");
+    if (resp.ok) {
+      const data = await resp.json();
+      renderTable(data.result);
+    }
+  } catch (err) {
+    console.error("Не удалось загрузить историю:", err);
+  }
+})();
