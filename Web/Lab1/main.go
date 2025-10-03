@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"math"
-	"net"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Result struct {
@@ -26,31 +26,39 @@ type Response struct {
 }
 
 var (
-	mu      sync.Mutex
-	history []Result
+	mu        sync.Mutex
+	histories = make(map[string][]Result) 
 )
 
 func hit(x, y, r float64) bool {
-	if r <= 0 || math.IsNaN(r) || math.IsInf(r, 0) {
-		return false
-	}
-	if math.IsNaN(x) || math.IsInf(x, 0) || math.IsNaN(y) || math.IsInf(y, 0) {
-		return false
-	}
-
 	if x <= 0 && y >= 0 && x*x+y*y <= r*r+1e-9 {
 		return true
 	}
 	if x >= 0 && y >= 0 && y <= (-x/2.0+r/2.0)+1e-9 {
 		return true
 	}
-	if x >= 0 && x <= r && y <= -r/2.0+1e-9 && y >= -r-1e-9 {
+	if x >= 0 && x <= r && y <= 0 && y >= -r {
 		return true
 	}
 	return false
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func getClientID(w http.ResponseWriter, r *http.Request) string {
+	c, err := r.Cookie("client_id")
+	if err == nil && c.Value != "" {
+		return c.Value
+	}
+	id := uuid.New().String()
+	http.SetCookie(w, &http.Cookie{
+		Name:    "client_id",
+		Value:   id,
+		Path:    "/",
+		Expires: time.Now().Add(7 * 24 * time.Hour),
+	})
+	return id
+}
+
+func apiHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -61,18 +69,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := r.URL.Query()
-	xStr, yStr, rStr := q.Get("x"), q.Get("y"), q.Get("r")
+	x, errX := strconv.ParseFloat(q.Get("x"), 64)
+	y, errY := strconv.ParseFloat(q.Get("y"), 64)
+	radius, errR := strconv.ParseFloat(q.Get("r"), 64)
 
-	x, errX := strconv.ParseFloat(xStr, 64)
-	y, errY := strconv.ParseFloat(yStr, 64)
-	radius, errR := strconv.ParseFloat(rStr, 64)
-
-	if errX != nil || errY != nil || errR != nil || !isFinite(x) || !isFinite(y) || !isFinite(radius) || radius <= 0 {
-		http.Error(w, "Invalid params: x, y must be numbers; r must be positive", http.StatusBadRequest)
+	if errX != nil || errY != nil || errR != nil || radius <= 0 {
+		http.Error(w, "Invalid params", http.StatusBadRequest)
 		return
 	}
-
-	log.Printf("New request: x=%.2f, y=%.2f, r=%.2f", x, y, radius)
 
 	res := Result{
 		X:      x,
@@ -83,56 +87,53 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		ExecMs: int(time.Since(start).Milliseconds()),
 	}
 
+	clientID := getClientID(w, r)
+
 	mu.Lock()
-	history = append(history, res)
-	if len(history) > 1000 {
-		history = history[len(history)-1000:]
+	histories[clientID] = append(histories[clientID], res)
+	if len(histories[clientID]) > 1000 {
+		histories[clientID] = histories[clientID][len(histories[clientID])-1000:]
 	}
 	resp := Response{
 		ReceivedAt: time.Now().Format(time.RFC3339),
-		Result:     append([]Result(nil), history...),
+		Result:     append([]Result(nil), histories[clientID]...),
 	}
 	mu.Unlock()
 
-	_ = json.NewEncoder(w).Encode(resp)
+	json.NewEncoder(w).Encode(resp)
 }
 
 func historyHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-    if r.Method != http.MethodGet {
-        http.Error(w, "Only GET allowed", http.StatusMethodNotAllowed)
-        return
-    }
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-    mu.Lock()
-    resp := Response{
-        ReceivedAt: time.Now().Format(time.RFC3339),
-        Result:     append([]Result(nil), history...),
-    }
-    mu.Unlock()
+	clientID := getClientID(w, r)
 
-    _ = json.NewEncoder(w).Encode(resp)
-}
+	mu.Lock()
+	hist := histories[clientID]
+	resp := Response{
+		ReceivedAt: time.Now().Format(time.RFC3339),
+		Result:     append([]Result(nil), hist...),
+	}
+	mu.Unlock()
 
-func isFinite(v float64) bool {
-	return !math.IsNaN(v) && !math.IsInf(v, 0)
+	json.NewEncoder(w).Encode(resp)
 }
 
 func main() {
-    mux := http.NewServeMux()
-    mux.HandleFunc("/api", handler)       
-    mux.HandleFunc("/history", historyHandler) 
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api", apiHandler)
+	mux.HandleFunc("/history", historyHandler)
 
-    fs := http.FileServer(http.Dir("./www"))
-    mux.Handle("/", fs)
+	fs := http.FileServer(http.Dir("./www"))
+	mux.Handle("/", fs)
 
-    addr := ":9000"
-    l, err := net.Listen("tcp", addr)
-    if err != nil {
-        log.Fatalf("listen: %v", err)
-    }
-    log.Printf("HTTP server listening on %s", addr)
-    log.Fatal(http.Serve(l, mux))
+	addr := ":9000"
+	log.Printf("Server listening on %s", addr)
+	log.Fatal(http.ListenAndServe(addr, mux))
 }
