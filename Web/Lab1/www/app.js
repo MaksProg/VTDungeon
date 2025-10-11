@@ -10,6 +10,8 @@ const MAX_HISTORY = 10;
 let R = 2;
 let history = [];
 
+
+
 // ----------------- Рисовка -----------------
 function drawScene(currentPoints = []) {
   ctx.clearRect(0, 0, size, size);
@@ -165,3 +167,43 @@ document.getElementById("reset-btn").addEventListener("click", async () => {
 // ----------------- Инициализация -----------------
 fetchHistory();
 drawScene();
+
+let gamepadIndex = null;
+
+window.addEventListener("load", () => {
+  const gamepads = navigator.getGamepads();
+  for (const gp of gamepads) {
+    if (gp) {
+      gamepadIndex = gp.index;
+      console.log(`Геймпад уже подключен: ${gp.id}`);
+    }
+  }
+});
+
+
+window.addEventListener("gamepadconnected", (e) =>{
+  gamepadIndex = e.gamepad.index;
+  console.log(`Геймпад подключен ${e.gamepad.id}`)
+})
+
+
+window.addEventListener("gamepaddisconnected", (e) => {
+  console.log(`Геймпад отключен: ${e.gamepad.id}`);
+  gamepadIndex = null;
+});
+
+function pollGamepad(){
+  if (gamepadIndex !== null){
+    const gp = navigator.getGamepads()[gamepadIndex];
+    if (gp){
+      const leftX = gp.axes[0];
+      const leftY = gp.axes[1];
+
+      const select = document.getElementById("x-select");
+      let xValue = parseFloat(select.value || "0");
+      if (leftX > 0.5) xValue = Math.min(xValue+1,5);
+      if (leftX<-0.5) xValue = Math.max(xValue -1,-3);
+      select.value = xValue;
+    }
+  }
+}
