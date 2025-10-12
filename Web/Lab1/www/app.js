@@ -149,7 +149,7 @@ document.getElementById("check-form").addEventListener("submit", async (e) => {
 
       drawScene([last]); // рисуем только последнюю точку
       document.getElementById("local-time").textContent = new Date().toLocaleTimeString();
-      console.log("Клиентское время:", msExec, "мс, сервер:", data.result.at(-1).ms_exec, "мс");
+      console.log("Клиентское время:", last.ms_exec, "мс, сервер:", data.result.at(-1).ms_exec, "мс");
     } catch (err) {
       showError(err.message);
     }
