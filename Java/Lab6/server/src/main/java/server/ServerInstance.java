@@ -86,7 +86,8 @@ public class ServerInstance {
           if (key.isAcceptable()) {
             SocketChannel clientChannel = serverSocket.accept();
             clientChannel.configureBlocking(false);
-            clientChannel.register(selector, SelectionKey.OP_READ, new NioObjectChannelWrapper(clientChannel));
+            clientChannel.register(
+                selector, SelectionKey.OP_READ, new NioObjectChannelWrapper(clientChannel));
             logger.info("Новое подключение: " + clientChannel.getRemoteAddress());
           } else if (key.isReadable()) {
             NioObjectChannelWrapper wrapper = (NioObjectChannelWrapper) key.attachment();
@@ -104,16 +105,17 @@ public class ServerInstance {
 
               if (payload instanceof Request request) {
                 logger.info("Получен запрос: " + request.getCommandName());
-                requestHandlerPool.submit(() -> {
-                  Response response = commandManager.handleRequest(request);
-                  try {
-                    wrapper.sendMessage(response);
-                    logger.info("Ответ отправлен клиенту");
-                  } catch (IOException e) {
-                    logger.warning("Не удалось отправить ответ клиенту: " + e.getMessage());
-                    closeClientConnection(key, wrapper);
-                  }
-                });
+                requestHandlerPool.submit(
+                    () -> {
+                      Response response = commandManager.handleRequest(request);
+                      try {
+                        wrapper.sendMessage(response);
+                        logger.info("Ответ отправлен клиенту");
+                      } catch (IOException e) {
+                        logger.warning("Не удалось отправить ответ клиенту: " + e.getMessage());
+                        closeClientConnection(key, wrapper);
+                      }
+                    });
               }
 
               wrapper.clearInBuffer();
@@ -182,8 +184,8 @@ public class ServerInstance {
   }
 
   /**
-   * Закрывает клиентское соединение и отменяет связанный {@link SelectionKey}.
-   * Используется для корректной обработки отключения клиента или ошибок ввода-вывода.
+   * Закрывает клиентское соединение и отменяет связанный {@link SelectionKey}. Используется для
+   * корректной обработки отключения клиента или ошибок ввода-вывода.
    *
    * <p>Метод отменяет регистрацию канала в {@link Selector} и закрывает {@link SocketChannel},
    * связанный с данным клиентом. При ошибке во время закрытия выводится сообщение в лог.

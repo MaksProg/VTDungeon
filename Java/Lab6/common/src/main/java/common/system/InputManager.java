@@ -19,11 +19,11 @@ public class InputManager {
    * @return Валидное значение типа T
    */
   public static <T> T promptValid(
-          Scanner in,
-          String prompt,
-          Function<String, T> parser,
-          Predicate<T> validator,
-          String errorMsg) {
+      Scanner in,
+      String prompt,
+      Function<String, T> parser,
+      Predicate<T> validator,
+      String errorMsg) {
     while (true) {
       System.out.print(prompt);
 
@@ -49,7 +49,6 @@ public class InputManager {
     }
   }
 
-
   public static void setScanner(Scanner newScanner) {
     scanner = newScanner;
   }
@@ -70,7 +69,6 @@ public class InputManager {
     scanner = new Scanner(inputStream);
   }
 
-
   private static final Scanner fallbackScanner = new Scanner(System.in);
 
   public static String safeNextLine() {
@@ -81,5 +79,4 @@ public class InputManager {
       return fallbackScanner.nextLine();
     }
   }
-
 }
