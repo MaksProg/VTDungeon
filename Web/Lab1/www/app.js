@@ -169,6 +169,11 @@ fetchHistory();
 drawScene();
 
 let gamepadIndex = null;
+let rIndex = 0;             
+let lastL1 = false;          
+let lastR1 = false;         
+let lastA = false;           
+let lastX = false;
 
 window.addEventListener("load", () => {
   const gamepads = navigator.getGamepads();
@@ -192,18 +197,79 @@ window.addEventListener("gamepaddisconnected", (e) => {
   gamepadIndex = null;
 });
 
-function pollGamepad(){
-  if (gamepadIndex !== null){
-    const gp = navigator.getGamepads()[gamepadIndex];
-    if (gp){
-      const leftX = gp.axes[0];
-      const leftY = gp.axes[1];
+let selectedR = []; // массив состояния чекбоксов
+let lastXTime = 0;
+let lastStickTime = 0;
+const stickDelay = 200; // мс между шагами по X
+const xStep = 1;        // шаг изменения X
+const ySmooth = 0.02;   // плавность изменения Y
 
-      const select = document.getElementById("x-select");
-      let xValue = parseFloat(select.value || "0");
-      if (leftX > 0.5) xValue = Math.min(xValue+1,5);
-      if (leftX<-0.5) xValue = Math.max(xValue -1,-3);
-      select.value = xValue;
-    }
+const rBoxesInit = document.querySelectorAll("input[name='r']");
+selectedR = Array.from(rBoxesInit).map(r => r.checked);
+
+function pollGamepad() {
+  if (gamepadIndex === null) {
+    requestAnimationFrame(pollGamepad);
+    return;
   }
+
+  const gp = navigator.getGamepads()[gamepadIndex];
+  if (!gp) {
+    requestAnimationFrame(pollGamepad);
+    return;
+  }
+
+  const now = performance.now();
+
+
+  const leftX = gp.axes[0];
+  const xSelect = document.getElementById("x-select");
+  let xValue = Number(xSelect.value || 0);
+  if (now - lastStickTime > stickDelay) {
+    if (leftX > 0.5) xValue = Math.min(xValue + xStep, 5);
+    if (leftX < -0.5) xValue = Math.max(xValue - xStep, -3);
+    xSelect.value = xValue;
+    lastStickTime = now;
+  }
+
+  const rightY = gp.axes[3]; 
+  const yInput = document.getElementById("y-input");
+  let yValue = Number(yInput.value || 0);
+  yValue -= rightY * ySmooth;
+  yValue = Math.max(-5, Math.min(5, yValue));
+  yInput.value = yValue.toFixed(2);
+
+
+  const rBoxes = document.querySelectorAll("input[name='r']");
+  const l1 = gp.buttons[4].pressed;
+  const r1 = gp.buttons[5].pressed;
+
+  if (l1 && !lastL1) rIndex = Math.max(0, rIndex - 1);
+  if (r1 && !lastR1) rIndex = Math.min(rBoxes.length - 1, rIndex + 1);
+
+
+  rBoxes.forEach((r, i) => r.checked = selectedR[i]);
+
+  lastL1 = l1;
+  lastR1 = r1;
+
+  const xBtn = gp.buttons[2].pressed;
+  if (xBtn && now - lastXTime > 150) { 
+    selectedR[rIndex] = !selectedR[rIndex];
+    lastXTime = now;
+  }
+
+  const aBtn = gp.buttons[0].pressed;
+  if (aBtn && !lastA) document.getElementById("submit-btn").click();
+  lastA = aBtn;
+
+    const bPressed = gp.buttons[1].pressed;
+    if (bPressed && !lastB) document.getElementById("reset-btn").click(); 
+    lastB = bPressed;
+
+  requestAnimationFrame(pollGamepad);
 }
+
+requestAnimationFrame(pollGamepad);
+
+
