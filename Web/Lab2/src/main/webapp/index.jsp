@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ЛР — попадание точки в область</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="css/style.css" />
   <script defer src="js/script.js"></script>
 </head>
 <body>
@@ -30,18 +30,22 @@
           <table class="form-table">
             <caption>Параметры</caption>
 
+            <!-- X: radio -5..3 -->
             <tr>
-              <td><label for="x-select">X:</label></td>
+              <td><span>X:</span></td>
               <td>
-                <select id="x-select" name="x" required>
-                  <option value="">-- выберите X --</option>
+                <div class="x-radios">
                   <c:forEach var="xVal" items="${xValues}">
-                    <option value="${xVal}">${xVal}</option>
+                    <label>
+                      <input type="radio" name="x" value="${xVal}" required>
+                      ${xVal}
+                    </label>
                   </c:forEach>
-                </select>
+                </div>
               </td>
             </tr>
 
+            <!-- Y -->
             <tr>
               <td><label for="y-input">Y:</label></td>
               <td>
@@ -50,17 +54,22 @@
               </td>
             </tr>
 
+            <!-- R: checkbox -->
             <tr>
               <td><span>R:</span></td>
               <td>
                 <div class="r-checkboxes">
                   <c:forEach var="rVal" items="${rValues}">
-                    <label><input type="checkbox" name="r" value="${rVal}">${rVal}</label>
+                    <label>
+                      <input type="checkbox" name="r" value="${rVal}">
+                      ${rVal}
+                    </label>
                   </c:forEach>
                 </div>
               </td>
             </tr>
 
+            <!-- Кнопка отправки -->
             <tr>
               <td></td>
               <td>
@@ -120,10 +129,4 @@
 
         <!-- Кнопка сброса истории -->
         <div class="reset-wrapper">
-          <button id="reset-btn" type="button">Сбросить историю</button>
-        </div>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
+          <button id="reset-btn" type="button">Сбросить историю</button
