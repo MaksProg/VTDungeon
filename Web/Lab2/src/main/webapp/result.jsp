@@ -8,30 +8,30 @@
 <body>
 <h2>Результаты проверки</h2>
 
-<table border="1">
-    <thead>
+<c:if test="${not empty results}">
+    <table border="1">
+        <thead>
         <tr>
             <th>X</th>
             <th>Y</th>
             <th>R</th>
             <th>Попадание</th>
-            <th>Время сервера</th>
+            <th>Время сервера (мс)</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         <c:forEach var="res" items="${results}">
-            <c:forEach var="rVal" items="${res.rList}">
-                <tr>
-                    <td>${res.point.x}</td>
-                    <td>${res.point.y}</td>
-                    <td>${rVal}</td>
-                    <td>${res.hit ? "Да" : "Нет"}</td>
-                    <td>${res.serverTime}</td>
-                </tr>
-            </c:forEach>
+            <tr>
+                <td>${res.point.x}</td>
+                <td>${res.point.y}</td>
+                <td>${res.point.r}</td>
+                <td>${res.hit ? "Да" : "Нет"}</td>
+                <td>${res.execTime}</td>
+            </tr>
         </c:forEach>
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</c:if>
 
 <a href="controller">Назад к форме</a>
 </body>
