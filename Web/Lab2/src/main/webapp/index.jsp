@@ -26,58 +26,53 @@
     <tr>
       <!-- Левая колонка: форма + график -->
       <td class="left-col">
-        <form id="check-form" action="controller" method="get" novalidate>
-          <table class="form-table">
-            <caption>Параметры</caption>
+       <form id="check-form" action="controller" method="get">
+         <table class="form-table">
+           <caption>Параметры</caption>
 
-            <!-- X: radio -5..3 -->
-            <tr>
-              <td><span>X:</span></td>
-              <td>
-                <div class="x-radios">
-                  <c:forEach var="xVal" items="${xValues}">
-                    <label>
-                      <input type="radio" name="x" value="${xVal}" required>
-                      ${xVal}
-                    </label>
-                  </c:forEach>
-                </div>
-              </td>
-            </tr>
+           <tr>
+             <td><span>X:</span></td>
+             <td>
+               <div class="x-radios">
+                 <c:forEach var="xVal" items="${xValues}">
+                   <label>
+                     <input type="radio" name="x" value="${xVal}" required>
+                     ${xVal}
+                   </label>
+                 </c:forEach>
+               </div>
+             </td>
+           </tr>
 
-            <!-- Y -->
-            <tr>
-              <td><label for="y-input">Y:</label></td>
-              <td>
-                <input id="y-input" name="y" type="text" placeholder="-5..5" required />
-                <div class="hint">Число с точкой или запятой, в диапазоне −5…5</div>
-              </td>
-            </tr>
+           <tr>
+             <td><label for="y-input">Y:</label></td>
+             <td>
+               <input id="y-input" name="y" type="text" placeholder="-5..5" required />
+             </td>
+           </tr>
 
-            <!-- R: checkbox -->
-            <tr>
-              <td><span>R:</span></td>
-              <td>
-                <div class="r-checkboxes">
-                  <c:forEach var="rVal" items="${rValues}">
-                    <label>
-                      <input type="checkbox" name="r" value="${rVal}">
-                      ${rVal}
-                    </label>
-                  </c:forEach>
-                </div>
-              </td>
-            </tr>
+           <tr>
+             <td><span>R:</span></td>
+             <td>
+               <div class="r-checkboxes">
+                 <c:forEach var="rVal" items="${rValues}">
+                   <label>
+                     <input type="checkbox" name="r" value="${rVal}">
+                     ${rVal}
+                   </label>
+                 </c:forEach>
+               </div>
+             </td>
+           </tr>
 
-            <!-- Кнопка отправки -->
-            <tr>
-              <td></td>
-              <td>
-                <button id="submit-btn" type="submit">Проверить</button>
-              </td>
-            </tr>
-          </table>
-        </form>
+           <tr>
+             <td></td>
+             <td>
+               <button id="submit-btn" type="submit">Проверить</button>
+             </td>
+           </tr>
+         </table>
+       </form>
 
         <!-- График -->
         <div class="canvas-wrapper">
@@ -92,7 +87,9 @@
           <caption>Статус</caption>
           <tr>
             <td>Локальное время:</td>
-            <td id="local-time">—</td>
+            <td id="local-time">
+                <%= java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")) %>
+            </td>
           </tr>
           <tr>
             <td>Последняя ошибка:</td>
@@ -116,11 +113,11 @@
           <tbody>
             <c:forEach var="res" items="${results}">
               <tr>
-                <td>${res.x}</td>
-                <td>${res.y}</td>
-                <td>${res.r}</td>
+                <td>${res.point.x}</td>
+                <td>${res.point.y}</td>
+                <td>${res.point.r}</td>
                 <td>${res.hit ? 'Да' : 'Нет'}</td>
-                <td>${res.serverTime}</td>
+                <td>${res.formattedServerTime}</td>
                 <td>${res.execTime}</td>
               </tr>
             </c:forEach>

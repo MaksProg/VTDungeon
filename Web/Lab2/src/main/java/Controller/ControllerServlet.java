@@ -23,7 +23,7 @@ public class ControllerServlet extends HttpServlet {
     String[] rParams = req.getParameterValues("r");
 
     if (xParam != null && yParam != null && rParams != null && rParams.length > 0) {
-      req.setAttribute("rValuesSelected", rParams);
+      req.setAttribute("rList", rParams);
       req.getRequestDispatcher("/areaCheck").forward(req, resp);
     } else {
       req.getRequestDispatcher("/index.jsp").forward(req, resp);

@@ -6,37 +6,46 @@ canvas.height = size;
 const center = size / 2;
 const scale = 40;
 
+// История результатов (не динамическая, просто для таблицы)
 const MAX_HISTORY = 10;
-let R = 2;  // текущий радиус для графика
-let history = [];
+
+// ----------------- Получаем текущие выбранные R -----------------
+function getSelectedRs() {
+    const rBoxes = document.querySelectorAll("input[name='r']:checked");
+    return Array.from(rBoxes).map(rb => parseFloat(rb.value));
+}
 
 // ----------------- Рисуем фигуры -----------------
 function drawScene(currentPoints = []) {
     ctx.clearRect(0, 0, size, size);
 
-    ctx.fillStyle = "rgba(0, 128, 255, 0.5)";
+    // --- Рисуем фигуры для каждого выбранного R ---
+    const rValues = getSelectedRs().sort((a, b) => a - b); // от меньшего к большему
+    rValues.forEach(R => {
+        ctx.fillStyle = "rgba(0, 128, 255, 0.3)";
 
-    // Первая четверть: круг R/2
-    ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.arc(center, center, R * scale / 2, 1.5 * Math.PI, 2 * Math.PI, false);
-    ctx.lineTo(center, center);
-    ctx.fill();
+        // Первая четверть: круг R/2
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.arc(center, center, R * scale / 2, 1.5 * Math.PI, 2 * Math.PI, false);
+        ctx.lineTo(center, center);
+        ctx.fill();
 
-    // Вторая четверть: квадрат R
-    ctx.beginPath();
-    ctx.rect(center - R * scale, center - R * scale, R * scale, R * scale);
-    ctx.fill();
+        // Вторая четверть: квадрат R
+        ctx.beginPath();
+        ctx.rect(center - R * scale, center - R * scale, R * scale, R * scale);
+        ctx.fill();
 
-    // Четвёртая четверть: треугольник с катетами R
-    ctx.beginPath();
-    ctx.moveTo(center, center);
-    ctx.lineTo(center + R * scale, center);
-    ctx.lineTo(center, center + R * scale);
-    ctx.closePath();
-    ctx.fill();
+        // Четвёртая четверть: треугольник с катетами R
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.lineTo(center + R * scale, center);
+        ctx.lineTo(center, center + R * scale);
+        ctx.closePath();
+        ctx.fill();
+    });
 
-    // Оси
+    // --- Оси ---
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -44,7 +53,7 @@ function drawScene(currentPoints = []) {
     ctx.moveTo(center, size); ctx.lineTo(center, 0); // OY
     ctx.stroke();
 
-    // Деления
+    // --- Деления ---
     ctx.fillStyle = "black";
     ctx.font = "12px Arial";
     ctx.textAlign = "center";
@@ -65,7 +74,7 @@ function drawScene(currentPoints = []) {
         ctx.fillText(i, center - 15, center - i * scale);
     }
 
-    // Рисуем текущие точки
+    // --- Рисуем текущие точки ---
     currentPoints.forEach(p => drawPoint(p.x, p.y, "blue"));
 }
 
@@ -85,89 +94,47 @@ function showError(msg) {
 function validate(x, y, rValues) {
     if (isNaN(x)) return showError("Выберите X!");
     if (isNaN(y) || y < -5 || y > 5) return showError("Y должен быть числом от -5 до 5.");
-    if (!rValues.length) return showError("Выберите хотя бы один R!");
+    if (!rValues || rValues.length === 0) return showError("Выберите хотя бы один R!");
     showError(null);
     return true;
 }
 
-// ----------------- Добавление строки в таблицу -----------------
-function addRowToTable(row) {
-    const tbody = document.querySelector("#results-table tbody");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td>${row.x}</td>
-        <td>${row.y}</td>
-        <td>${row.r}</td>
-        <td>${row.hit ? "Да" : "Нет"}</td>
-        <td>${row.time}</td>
-        <td>${row.ms_exec}</td>
-    `;
-    tbody.prepend(tr);
-
-    while (tbody.rows.length > MAX_HISTORY) {
-        tbody.deleteRow(tbody.rows.length - 1);
-    }
-}
-
 // ----------------- Сабмит формы -----------------
-document.getElementById("check-form").addEventListener("submit", async e => {
+document.getElementById("check-form").addEventListener("submit", e => {
     e.preventDefault();
-
     const xRadio = document.querySelector("input[name='x']:checked");
-    if (!xRadio) return showError("Выберите X!");
-    const x = parseFloat(xRadio.value);
+    const x = xRadio ? parseFloat(xRadio.value) : NaN;
+    const y = parseFloat(document.getElementById("y-input").value.replace(",", "."));
+    const rValues = getSelectedRs();
 
-    const yInput = document.getElementById("y-input");
-    const y = parseFloat(yInput.value.replace(",", "."));
-
-    const rBoxes = document.querySelectorAll("input[name='r']:checked");
-    const rValues = Array.from(rBoxes).map(b => parseFloat(b.value));
     if (!validate(x, y, rValues)) return;
 
-    try {
-        for (const r of rValues) {
-            R = r;
-            const start = performance.now();
-            const params = new URLSearchParams({ x, y, r });
-            const resp = await fetch(`controller?${params.toString()}`, {
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const end = performance.now();
-            if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
-            const data = await resp.json();
-            const last = data.result[0];
-            last.ms_exec = Math.round(end - start);
-            last.time = new Date().toLocaleTimeString();
-            history.push(last);
-            addRowToTable(last);
-            drawScene([last]);
-            document.getElementById("local-time").textContent = last.time;
-        }
-    } catch (err) {
-        showError(err.message);
-    }
+    rValues.forEach(r => {
+        const url = `controller?x=${x}&y=${y}&r=${r}`;
+        window.open(url, "_blank");
+    });
 });
 
 // ----------------- Клик по графику -----------------
 canvas.addEventListener("click", e => {
     const rect = canvas.getBoundingClientRect();
-    const xClick = (e.clientX - rect.left - center) / scale;
+    const xClick = ((e.clientX - rect.left) - center) / scale;
     const yClick = (center - (e.clientY - rect.top)) / scale;
+    const rValues = getSelectedRs();
 
-    const rBoxes = document.querySelectorAll("input[name='r']:checked");
-    if (!rBoxes.length) return showError("Выберите хотя бы один R перед кликом на графике!");
-    const r = parseFloat(rBoxes[0].value); // используем первый выбранный R
-    R = r;
+    if (rValues.length === 0) return showError("Выберите хотя бы один R перед кликом на графике!");
 
-    submitPoint(xClick.toFixed(2), yClick.toFixed(2), r);
+    if (!validate(xClick, yClick, rValues)) return;
+
+    rValues.forEach(r => {
+        const url = `controller?x=${xClick.toFixed(2)}&y=${yClick.toFixed(2)}&r=${r}`;
+        window.open(url, "_blank");
+    });
 });
 
-// ----------------- Кнопка сброса -----------------
-document.getElementById("reset-btn").addEventListener("click", () => {
-    const tbody = document.querySelector("#results-table tbody");
-    tbody.innerHTML = "";
-    history = [];
-    drawScene();
+// ----------------- Смена R -----------------
+document.querySelectorAll("input[name='r']").forEach(rb => {
+    rb.addEventListener("change", () => drawScene());
 });
 
 // ----------------- Инициализация -----------------
