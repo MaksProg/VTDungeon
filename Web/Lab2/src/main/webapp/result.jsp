@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
-    <title>Результат проверки</title>
+    <title>Результаты проверки</title>
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -20,13 +20,15 @@
     </thead>
     <tbody>
         <c:forEach var="res" items="${results}">
-            <tr>
-                <td>${res.point.x}</td>
-                <td>${res.point.y}</td>
-                <td>${res.point.r}</td>
-                <td>${res.hit ? "Да" : "Нет"}</td>
-                <td>${res.serverTime}</td>
-            </tr>
+            <c:forEach var="rVal" items="${res.rList}">
+                <tr>
+                    <td>${res.point.x}</td>
+                    <td>${res.point.y}</td>
+                    <td>${rVal}</td>
+                    <td>${res.hit ? "Да" : "Нет"}</td>
+                    <td>${res.serverTime}</td>
+                </tr>
+            </c:forEach>
         </c:forEach>
     </tbody>
 </table>

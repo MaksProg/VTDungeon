@@ -19,14 +19,14 @@ public class AreaCheckServlet extends HttpServlet {
 
     String xParam = req.getParameter("x");
     String yParam = req.getParameter("y");
-    String rParam = req.getParameter("r");
+    String[] rParams = req.getParameterValues("r");
 
     if (xParam == null
         || xParam.isEmpty()
         || yParam == null
         || yParam.isEmpty()
-        || rParam == null
-        || rParam.isEmpty()) {
+        || rParams == null
+        || rParams.length == 0) {
       req.setAttribute("errorMessage", "Все параметры должны быть заданы!");
       req.getRequestDispatcher("/index.jsp").forward(req, resp);
       return;
@@ -34,26 +34,30 @@ public class AreaCheckServlet extends HttpServlet {
 
     double x = Double.parseDouble(xParam);
     double y = Double.parseDouble(yParam);
-    double r = Double.parseDouble(rParam);
 
+    List<HitResult> results = new ArrayList<>();
     long start = System.currentTimeMillis();
-    Point point = new Point(x, y, r);
-    boolean hit = AreaChecker.check(point);
-    long execTime = System.currentTimeMillis() - start;
-    HitResult result = new HitResult(point, hit, execTime);
+
+    for (String rStr : rParams) {
+      double r = Double.parseDouble(rStr);
+      Point point = new Point(x, y, r);
+      boolean hit = AreaChecker.check(point);
+      long execTime = System.currentTimeMillis() - start;
+      results.add(new HitResult(point, hit, execTime));
+    }
 
     ServletContext context = getServletContext();
     synchronized (context) {
       @SuppressWarnings("unchecked")
-      List<HitResult> results = (List<HitResult>) context.getAttribute("results");
-      if (results == null) {
-        results = new ArrayList<>();
-        context.setAttribute("results", results);
+      List<HitResult> contextResults = (List<HitResult>) context.getAttribute("results");
+      if (contextResults == null) {
+        contextResults = new ArrayList<>();
+        context.setAttribute("results", contextResults);
       }
-      results.add(result);
+      contextResults.addAll(results);
     }
 
-    req.setAttribute("result", result);
+    req.setAttribute("results", results);
     req.getRequestDispatcher("/result.jsp").forward(req, resp);
   }
 }
