@@ -1,38 +1,50 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<html>
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-    <title>Результаты проверки</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <meta charset="UTF-8">
+    <title>Результаты</title>
+    <link rel="stylesheet" href="css/result.css">
+    <script src="js/video-control.js"></script>
 </head>
 <body>
-<h2>Результаты проверки</h2>
 
-<c:if test="${not empty results}">
-    <table border="1">
+<div class="results-container">
+    <h2>История запросов</h2>
+
+    <table>
         <thead>
-        <tr>
-            <th>X</th>
-            <th>Y</th>
-            <th>R</th>
-            <th>Попадание</th>
-            <th>Время сервера (мс)</th>
-        </tr>
+            <tr>
+                <th>X</th>
+                <th>Y</th>
+                <th>R</th>
+                <th>Попадание</th>
+                <th>Время сервера</th>
+            </tr>
         </thead>
         <tbody>
-        <c:forEach var="res" items="${results}">
-            <tr>
-                <td>${res.point.x}</td>
-                <td>${res.point.y}</td>
-                <td>${res.point.r}</td>
-                <td>${res.hit ? "Да" : "Нет"}</td>
-                <td>${res.execTime}</td>
-            </tr>
-        </c:forEach>
+            <c:forEach var="res" items="${results}">
+                <tr>
+                    <td>${res.point.x}</td>
+                    <td>${res.point.y}</td>
+                    <td>${res.point.r}</td>
+                    <td>${res.hit ? "Да" : "Нет"}</td>
+                    <td>${res.formattedServerTime}</td>
+                </tr>
+            </c:forEach>
         </tbody>
     </table>
-</c:if>
 
-<a href="controller">Назад к форме</a>
+    <a href="controller">Назад к форме</a>
+</div>
+
+<div class="video-container">
+    <video autoplay muted loop>
+        <source src="videos/background.mp4" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+    </video>
+</div>
+
 </body>
 </html>

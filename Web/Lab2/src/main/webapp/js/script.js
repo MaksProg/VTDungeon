@@ -112,7 +112,7 @@ document.getElementById("check-form").addEventListener("submit", e => {
     const y = parseFloat(document.getElementById("y-input").value.replace(",", "."));
     const rValues = getSelectedRs();
 
-    if (isNaN(x) || isNaN(y) || !rValues.length) {
+    if (isNaN(x) || isNaN(y) || !rValues.length || x>3 || x <-5||y<-5||y>5) {
         alert("Введите корректные значения X, Y и выберите хотя бы один R!");
         return;
     }
