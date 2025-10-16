@@ -91,6 +91,10 @@ canvas.addEventListener("click", e => {
     const yClick = (center - (e.clientY - rect.top)) / scale;
     const rValues = getSelectedRs();
 
+    if (xClick < -3 || xClick > 5 || yClick < -5 || yClick > 5) {
+        return;
+    }
+
     if (!rValues.length) {
         alert("Выберите хотя бы один R!");
         return;
@@ -103,6 +107,7 @@ canvas.addEventListener("click", e => {
 
     window.location.href = `controller?${params.toString()}`;
 });
+
 
 // ----------------- Сабмит формы -----------------
 document.getElementById("check-form").addEventListener("submit", e => {
