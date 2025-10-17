@@ -1,57 +1,40 @@
 package Controller;
 
 import Model.HitResult;
-import Model.Point;
-import Util.AreaChecker;
+import Service.AreaCheckService;
+import Util.RequestUtils;
+import Util.RequestUtils.InputParams;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class AreaCheckServlet extends HttpServlet {
+
+  private final AreaCheckService service = new AreaCheckService();
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
-    String xParam = req.getParameter("x");
-    String yParam = req.getParameter("y");
-    String[] rParams = req.getParameterValues("r");
-
-    if (xParam == null
-        || xParam.isEmpty()
-        || yParam == null
-        || yParam.isEmpty()
-        || rParams == null
-        || rParams.length == 0) {
-      req.setAttribute("errorMessage", "Все параметры должны быть заданы!");
+    RequestUtils.setupCommonAttributes(req);
+    InputParams params = (InputParams) req.getAttribute("validatedParams");
+    if (params == null) {
       req.getRequestDispatcher("/index.jsp").forward(req, resp);
       return;
     }
 
-    double x = Double.parseDouble(xParam);
-    double y = Double.parseDouble(yParam);
-
-    List<HitResult> results = new ArrayList<>();
-    long start = System.currentTimeMillis();
-
-    for (String rStr : rParams) {
-      double r = Double.parseDouble(rStr);
-      Point point = new Point(x, y, r);
-      boolean hit = AreaChecker.check(point);
-      long execTime = System.currentTimeMillis() - start;
-      results.add(new HitResult(point, hit, execTime));
-    }
+    List<HitResult> results = service.checkPoints(params.x(), params.y(), params.rList());
 
     ServletContext context = getServletContext();
     synchronized (context) {
       @SuppressWarnings("unchecked")
       List<HitResult> contextResults = (List<HitResult>) context.getAttribute("results");
       if (contextResults == null) {
-        contextResults = new ArrayList<>();
+        contextResults = new java.util.ArrayList<>();
         context.setAttribute("results", contextResults);
       }
       contextResults.addAll(results);
