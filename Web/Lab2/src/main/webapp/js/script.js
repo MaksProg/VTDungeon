@@ -130,6 +130,12 @@ document.getElementById("check-form").addEventListener("submit", e => {
     window.location.href = `controller?${params.toString()}`;
 });
 
+document.getElementById("reset-btn").addEventListener("click", () => {
+    fetch("controller?action=reset")
+        .then(() => window.location.reload())
+        .catch(err => alert("Ошибка при сбросе истории: " + err));
+});
+
 // ----------------- Перерисовка графика при выборе R -----------------
 document.querySelectorAll("input[name='r']").forEach(rb => rb.addEventListener("change", drawScene));
 

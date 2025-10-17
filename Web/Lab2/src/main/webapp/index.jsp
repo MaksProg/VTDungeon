@@ -97,6 +97,10 @@
           </tr>
         </table>
 
+        <!-- Кнопка сброса истории -->
+        <div class="reset-wrapper">
+        <button id="reset-btn" type="button">Сбросить историю</button
+
         <!-- Таблица истории -->
         <table class="results" id="results-table">
           <caption>История проверок</caption>
@@ -124,6 +128,4 @@
           </tbody>
         </table>
 
-        <!-- Кнопка сброса истории -->
-        <div class="reset-wrapper">
-          <button id="reset-btn" type="button">Сбросить историю</button
+

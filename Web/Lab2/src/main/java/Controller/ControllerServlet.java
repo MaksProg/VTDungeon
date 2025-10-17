@@ -18,6 +18,13 @@ public class ControllerServlet extends HttpServlet {
     req.setAttribute("xValues", xValues);
     req.setAttribute("rValues", rValues);
 
+    String action = req.getParameter("action");
+    if ("reset".equals(action)) {
+      getServletContext().removeAttribute("results");
+      resp.setStatus(HttpServletResponse.SC_OK);
+      return;
+    }
+
     String xParam = req.getParameter("x");
     String yParam = req.getParameter("y");
     String[] rParams = req.getParameterValues("r");
