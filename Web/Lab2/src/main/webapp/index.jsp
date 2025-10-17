@@ -99,7 +99,7 @@
 
         <!-- Кнопка сброса истории -->
         <div class="reset-wrapper">
-        <button id="reset-btn" type="button">Сбросить историю</button
+        <button id="reset-btn" type="button">Сбросить историю</button>
 
         <!-- Таблица истории -->
         <table class="results" id="results-table">
@@ -127,5 +127,6 @@
             </c:forEach>
           </tbody>
         </table>
-
+    </body>
+</html?
 
